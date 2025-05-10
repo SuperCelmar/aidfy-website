@@ -11,3 +11,4 @@ tsconfig.json filter=lfs diff=lfs merge=lfs -text
 README.md filter=lfs diff=lfs merge=lfs -text
 components filter=lfs diff=lfs merge=lfs -text
 next.config.mjs filter=lfs diff=lfs merge=lfs -text
+.png filter=lfs diff=lfs merge=lfs -text
