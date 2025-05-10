@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* You can add CSS-first customizations here using @theme if needed */
+/* For example, if you had custom colors in tailwind.config.ts: */
+/* @theme { */
+/*   --color-primary: #2563EB; */
+/*   --color-lightBg: #F9FAFB; */
+/* } */
+
+@layer base {
+  :root {
+    /* --gradient-color: #8350e8; */ /* Example color from demo - can be changed to brand primary */
+    /* --sparkles-color: #8350e8; */ /* Example color from demo - can be changed to brand primary or white */
+    --gradient-color: #334155; /* Your brand primary */
+    --sparkles-color: #334155; /* Your brand primary */
+  }
+
+  /* If you implement a dark theme later with next-themes */
+  /* .dark { */
+  /*   --gradient-color: #2563EB; */ /* Adjust if needed for dark theme */
+  /*   --sparkles-color: #ffffff; */ /* Sparkles might be white on dark theme */
+  /* } */
+} 
