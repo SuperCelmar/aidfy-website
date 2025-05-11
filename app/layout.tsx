@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: 'AutomationDFY - Unlock New Channels With AI Marketing Solutions',
   description: 'Boost your growth while you sleep. Our AI-powered platform helps founders and marketing managers automate campaigns across channels.',
   icons: {
-    icon: '/assets/favicon_io/favicon.ico',
+    icon: 'https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets//favicon.ico',
   },
 }
 

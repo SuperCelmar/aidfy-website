@@ -26,7 +26,7 @@ export default function Header() {
         </Link>
         <nav className="space-x-6 flex items-center">
           <Link href="/#features" className="text-gray-600 hover:text-slate-700">
-            Platform
+            Features
           </Link>
           <Link href="/#use-cases" className="text-gray-600 hover:text-slate-700">
             Use Cases

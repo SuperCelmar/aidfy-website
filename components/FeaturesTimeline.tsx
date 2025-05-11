@@ -15,8 +15,10 @@ import {
 
 interface Feature {
   id: string;
+  section_title: string;
   title: string;
   description: string;
+  bullet_points?: string[]; // Added optional bullet_points
   icon: React.ElementType; // Corrected type for React component
   imageSrc: string; // Unsplash image URL
   imageAlt: string;
@@ -26,43 +28,50 @@ interface Feature {
 const defaultFeaturesData: Feature[] = [
   {
     id: 'feat-phone',
-    title: "EQ AI Phone Callers",
-    description: "Turns off-hours missed calls into business opportunities, ensuring every lead is captured and nurtured, 24/7.",
+    section_title: "AI Phone Callers",
+    title: "Never Miss a Lead — 24/7 AI Call Handling",
+    description: "Our AI Phone Callers answer every incoming call (even nights & weekends), qualify prospects with scripted questions, verify contact details and automatically schedule follow-up or demos—so you capture and convert 100% of your opportunities.",
+    bullet_points: [
+      "🕒 <strong>24/7 Coverage</strong> — No more lost leads outside office hours",
+      "🎯 <strong>Instant Qualification</strong> — Ask the right questions, capture intent",
+      "📅 <strong>Auto-Scheduling</strong> — Book demos in real time",
+      "🔗 <strong>CRM Sync</strong> — Data flows straight into your systems"
+    ],
     icon: PhoneOutgoing,
-    imageSrc: 'https://images.unsplash.com/photo-1520923642038-b42e59690fe2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y2FsbCUyMGNlbnRlcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    imageSrc: 'https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/phone_call_caucasian.png',
     imageAlt: 'AI Phone Caller Interface'
   },
   {
     id: 'feat-chatbot',
-    title: "AI Website Chatbot",
-    description: "A full-fledged conversational AI embedded on your site, providing instant answers and guiding users effectively.",
+    section_title: "Website Embedded Chatbot",
+    title: "Top-Tier Customer Experience — Increases Conversions",
+    description: "Imagine having an AI that welcomes each visitor, answers questions instantly, and guides them straight to checkout. That lives within your website, and not on a pop-up widget. Boosting conversions while your team can focus on more operational tasks.",
     icon: MessageSquareText,
-    imageSrc: 'https://images.unsplash.com/photo-1551809008-4a67a1309010?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGNoYXRib3QlMjB1aXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    imageSrc: 'https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/chatbot_caucasian.png',
     imageAlt: 'AI Chatbot on Website'
   },
   {
     id: 'feat-expansion',
-    title: "Channel Expansion Engine",
-    description: "Boost conversion rates with AI-driven SMS & phone campaigns, reaching customers on their preferred channels.",
+    section_title: "Channel Expansion Engine",
+    title: "Unlock Growth with with Multi-Channel Outreach",
+    description: "Reach every customer on their favorite platform—SMS, WhatsApp, web-chat or phone—using our smart orchestration engine that personalizes and scales your campaigns automatically.",
+    bullet_points: [
+      "🔗 <strong>Multi-Channel</strong> — SMS, WhatsApp, Telegram, Discord, web-chat or phone",
+      "🔄 <strong>Smart Orchestration</strong> — AI Personalizes and scales campaigns",
+      "📈 <strong>Growth Engine</strong> — Automate outreach to new customers"
+    ],
     icon: Share2,
-    imageSrc: 'https://images.unsplash.com/photo-1580130281329-39b893951a30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8c21zJTIwbWFya2V0aW5nfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
+    imageSrc: 'https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/multichanel.png',
     imageAlt: 'Multi-channel marketing dashboard'
   },
   {
     id: 'feat-crm',
-    title: "CRM Integration Hub",
+    section_title: "CRM Integration",
+    title: "One CRM to Rule Them All — Increases Efficiency",
     description: "Seamlessly connects with any CRM platform out of the box, ensuring smooth data flow and synchronized operations.",
     icon: Network,
-    imageSrc: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y3JtfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
+    imageSrc: 'https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/CRM-section.png',
     imageAlt: 'CRM Integration Network'
-  },
-  {
-    id: 'feat-scheduling',
-    title: "Autonomous Scheduling Agents",
-    description: "Automate your appointment booking end-to-end, freeing up your team and reducing no-shows.",
-    icon: CalendarClock,
-    imageSrc: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHNjaGVkdWxpbmd8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
-    imageAlt: 'Automated Scheduling Calendar'
   }
 ];
 
@@ -74,12 +83,12 @@ interface FeaturesTimelineProps {
 
 const FeaturesTimeline: React.FC<FeaturesTimelineProps> = ({
   features = defaultFeaturesData,
-  sectionTitle = "How Our AI Elevates Your Business",
-  sectionSubtitle = "Discover the core features that drive growth, efficiency, and customer satisfaction for our partners."
+  sectionTitle = "How Our AI Solutions Elevate Your Business",
+  sectionSubtitle = "Discover the core features that drive growth, efficiency, and customer satisfaction."
 }) => {
 
   const timelineData: TimelineEntry[] = features.map(feature => ({
-    title: feature.title,
+    title: feature.section_title,
     content: (
       <div className="space-y-4">
         <div className="flex items-center text-slate-700 mb-2">
@@ -95,7 +104,7 @@ const FeaturesTimeline: React.FC<FeaturesTimelineProps> = ({
             alt={feature.imageAlt} 
             width={500} // Provide appropriate width
             height={312} // Provide appropriate height based on 16:10 aspect ratio
-            className="object-cover w-full h-full transform hover:scale-105 transition-transform duration-300"
+            className="object-contain w-full h-full transform hover:scale-105 transition-transform duration-300" // Changed object-cover to object-contain
           />
         </div>
       </div>

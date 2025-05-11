@@ -231,7 +231,7 @@ export default function Chatbot() {
   // Updated Thinking Indicator
   const thinkingIndicator = (
     <div className="flex items-center mb-4 pl-4"> 
-      <Image src="/assets/logo.png" alt="Brand Logo" width={28} height={28} className="mr-3 h-7 w-7" />
+      <Image src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/logo.png" alt="Brand Logo" width={28} height={28} className="mr-3 h-7 w-7" />
       <TextShimmer 
         as="h2" 
         className="text-3xl opacity-70 font-mono"
@@ -257,16 +257,20 @@ export default function Chatbot() {
   return (
     <div className="flex flex-col w-full space-y-4"> 
       <div className="min-h-[120px]">
-        {/* User Message */}
+        {/* Thinking Indicator - Rendered if isThinking is true */}
+        {isThinking && thinkingIndicator}
+
+        {/* User Message - Rendered if the last message is from the user */}
         {lastMessage && lastMessage.type === 'user' && (
           <div className={`pt-4 pb-2 ml-${logoWidthPlusGap}`}> 
-            <h2 className="text-5xl font-medium text-slate-700">
+            <h2 className="text-3xl font-medium text-sky-600">
               You: {lastMessage.text}
             </h2>
           </div>
         )}
-        {/* AI Message */}
-        {lastMessage && lastMessage.type === 'ai' && (
+
+        {/* AI Message Content - Rendered only if not thinking and last message is AI */}
+        {lastMessage && lastMessage.type === 'ai' && !isThinking && (
           <div className={`pt-4 pb-2 transition-opacity duration-300 ${inputValue.trim() ? 'opacity-50' : 'opacity-100'}`}> 
             {lastMessage.text && (
               <div className={`flex-grow ml-${logoWidthPlusGap}`}> 
@@ -322,7 +326,13 @@ export default function Chatbot() {
                 <div 
                   ref={carouselContainerRef} 
                   className="mt-4 overflow-x-auto pb-4 scroll-smooth no-scrollbar scroll-pl-6 md:scroll-pl-10 lg:scroll-pl-16"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} // Force hide scrollbar
                 > 
+                  <style jsx global>{`
+                    .no-scrollbar::-webkit-scrollbar {
+                      display: none;
+                    }
+                  `}</style>
                   <div className="flex space-x-6 px-6 md:px-10 lg:px-16"> 
                     {lastMessage.carousel.map((card, index) => {
                       const isActive = index === activeIndex;
@@ -340,7 +350,7 @@ export default function Chatbot() {
                           {/* Logo + ID Overlay */} 
                           <div className={`absolute top-0.5 left-4 z-20 flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full transition-all duration-300 ease-out ${isActive ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}> 
                             <Image 
-                              src="/assets/logo.png" 
+                              src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/logo.png" 
                               alt="Logo" 
                               width={24} 
                               height={24} 
@@ -379,11 +389,29 @@ export default function Chatbot() {
                               </div>
                             </div>
                           </div>
-                        </div> // End of Wrapper Div
-                      ); // End of return for map
-                    })} {/* Closing brace and paren for map */}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
+                {/* Dots Navigation */}
+                {(lastMessage.carousel.length ?? 0) > 1 && (
+                  <div className="flex justify-center items-center space-x-2 pt-4 mt-2">
+                    {lastMessage.carousel.map((_, index) => (
+                      <button
+                        key={`dot-${index}`}
+                        onClick={() => {
+                          setActiveIndex(index);
+                          scrollToCard(index);
+                        }}
+                        aria-label={`Go to card ${index + 1}`}
+                        className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ease-out
+                                    ${activeIndex === index ? 'bg-slate-700 scale-125' : 'bg-gray-300 hover:bg-gray-400'}
+                                    focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50`}
+                      />
+                    ))}
+                  </div>
+                )}
                 {/* Prev/Next Buttons */} 
                 {activeIndex > 0 && (
                   <button 
@@ -407,46 +435,47 @@ export default function Chatbot() {
                     </svg>
                   </button>
                 )}
-              </div> // End Carousel Relative Container
-            )} 
+              </div>
+            )}
           </div>
         )}
-        {/* System Message */}
-        {lastMessage && lastMessage.type === 'system' && (
+
+        {/* System Message - Rendered only if not thinking and last message is system */}
+        {lastMessage && lastMessage.type === 'system' && !isThinking && (
              <div className={`pt-4 pb-2 ml-${logoWidthPlusGap}`}> 
                 <h2 className="text-lg italic text-red-600">
                     {lastMessage.text}
                 </h2>
              </div>
         )}
-        {/* Thinking Indicator */} 
-        {isThinking && thinkingIndicator}
       </div>
 
-      {/* Input Area */} 
-      <div className={`mt-auto space-y-3 ml-${logoWidthPlusGap}`}> 
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && !isThinking && inputValue.trim() && handleSendMessage()}
-          placeholder="Type here..." 
-          className="w-full p-3 bg-transparent text-gray-800 focus:outline-none transition-colors text-xl placeholder-gray-500"
-          disabled={isThinking}
-        />
-        {inputValue.trim() && !isThinking && (
-          <div className="flex justify-start items-center"> 
-            <button
-              onClick={() => inputValue.trim() && handleSendMessage()}
-              disabled={isThinking || !inputValue.trim()} 
-              className="px-7 py-3 bg-slate-700 text-white rounded-full hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-opacity-50 disabled:opacity-50 transition-colors text-base font-medium shadow-sm"
-            >
-              Send
-            </button>
-            <p className="ml-4 self-center text-base text-gray-500">Or Press Enter</p>
-          </div>
-        )}
-      </div>
+      {/* Input Area - Conditionally rendered based on !isThinking */}
+      { !isThinking && (
+        <div className={`mt-auto space-y-3 ml-${logoWidthPlusGap}`}> 
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && !isThinking && inputValue.trim() && handleSendMessage()}
+            placeholder="Type here..." 
+            className="w-full p-3 bg-transparent text-gray-800 focus:outline-none transition-colors text-xl placeholder-gray-500"
+            disabled={isThinking} // This disabled prop is technically redundant now but harmless
+          />
+          {inputValue.trim() && !isThinking && ( // This !isThinking is also redundant due to the parent conditional, but harmless
+            <div className="flex justify-start items-center"> 
+              <button
+                onClick={() => inputValue.trim() && handleSendMessage()}
+                disabled={isThinking || !inputValue.trim()} 
+                className="px-7 py-3 bg-slate-700 text-white rounded-full hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-opacity-50 disabled:opacity-50 transition-colors text-base font-medium shadow-sm"
+              >
+                Send
+              </button>
+              <p className="ml-4 self-center text-base text-gray-500">Or Press Enter</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 } 
