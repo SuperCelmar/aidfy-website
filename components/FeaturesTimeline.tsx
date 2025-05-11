@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { CustomTimeline, TimelineEntry } from '@/components/ui/CustomTimeline'; // Updated import path
+import { CustomTimeline } from '@/components/ui/CustomTimeline';
 import {
   Zap, // Lightning bolt for AI/Speed
   PhoneOutgoing, // Phone calls
@@ -87,13 +87,13 @@ const FeaturesTimeline: React.FC<FeaturesTimelineProps> = ({
   sectionSubtitle = "Discover the core features that drive growth, efficiency, and customer satisfaction."
 }) => {
 
-  const timelineData: TimelineEntry[] = features.map(feature => ({
+  const timelineData = features.map(feature => ({
     title: feature.section_title,
-    content: (
+    description: (
       <div className="space-y-4">
         <div className="flex items-center text-slate-700 mb-2">
-          <feature.icon className="w-6 h-6 mr-3 stroke-current" /> {/* Added stroke-current for lucide icons */}
-          <p className="font-semibold text-lg text-gray-800">{feature.title}</p>
+          <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 stroke-current" /> {/* Adjusted icon size and margin slightly for mobile */}
+          <p className="font-semibold text-base sm:text-lg text-gray-800">{feature.title}</p> {/* Made font size responsive */}
         </div>
         <p className="text-sm md:text-base text-gray-600 leading-relaxed">
           {feature.description}
@@ -112,11 +112,11 @@ const FeaturesTimeline: React.FC<FeaturesTimelineProps> = ({
   }));
 
   return (
-    <section id="features" className="py-12 md:py-20 bg-slate-50">
+    <section id="features" className="py-12 md:py-20 bg-white">
       <CustomTimeline 
-          data={timelineData} 
-          sectionTitle={sectionTitle}
-          sectionSubtitle={sectionSubtitle}
+          items={timelineData}
+          title={sectionTitle}
+          subtitle={sectionSubtitle}
       />
     </section>
   );
