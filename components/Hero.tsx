@@ -19,7 +19,7 @@ export default function Hero() {
           {/* Right Column: Image - Reinserted */}
           <div className="flex justify-center lg:order-last">
             <Image 
-              src="/assets/hero_caucasian.png" 
+              src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets//hero_caucasian.png" 
               alt="Smiling person - AI Marketing Solutions for AutomationDFY"
               width={550}
               height={550}

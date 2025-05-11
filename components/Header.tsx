@@ -14,7 +14,7 @@ export default function Header() {
       <div className="container mx-auto px-10 max-w-7xl flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-3">
           <Image 
-            src="/assets/logo.png" 
+            src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets//logo.png" 
             alt="AutomationDFY Logo"
             width={160}
             height={40}

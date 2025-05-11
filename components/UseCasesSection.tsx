@@ -12,7 +12,7 @@ const useCasesData: Tab[] = [
       <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-center">
         <div className="relative w-full h-96 sm:h-[500px] lg:h-[660px] rounded-lg overflow-hidden shadow-lg">
           <Image
-            src="/assets/edible_casestudy.webp"
+            src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets//edible_casestudy.webp"
             alt="Customer service team during peak season"
             fill
             className="object-cover"
@@ -37,7 +37,7 @@ const useCasesData: Tab[] = [
       <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-center">
         <div className="relative w-full h-96 sm:h-[500px] lg:h-[660px] rounded-lg overflow-hidden shadow-lg">
           <Image
-            src="/assets/togos-casestudy.jpg"
+            src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets//togos-casestudy.jpg"
             alt="Restaurant order tracking system"
             fill
             className="object-cover"

@@ -231,7 +231,7 @@ export default function Chatbot() {
   // Updated Thinking Indicator
   const thinkingIndicator = (
     <div className="flex items-center mb-4 pl-4"> 
-      <Image src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/logo.png" alt="Brand Logo" width={28} height={28} className="mr-3 h-7 w-7" />
+      <Image src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets//logo.png" alt="Brand Logo" width={28} height={28} className="mr-3 h-7 w-7" />
       <TextShimmer 
         as="h2" 
         className="text-3xl opacity-70 font-mono"
@@ -285,7 +285,7 @@ export default function Chatbot() {
                         words={currentAnimatingText!} 
                         className={combinedClassName}
                         duration={0.5} 
-                        staggerDuration={0.05} 
+                        staggerDuration={0.05}
                         filter={true} 
                         as="div" 
                         onAnimationComplete={() => {
