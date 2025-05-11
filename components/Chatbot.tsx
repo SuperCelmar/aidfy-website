@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, memo } from 'react'
 import Image from 'next/image'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { TextGenerateEffect } from '@/components/ui/text-generate-effect'
@@ -28,6 +28,103 @@ interface ChatMessage {
   carousel?: CarouselCard[]; // Add optional carousel property
 }
 
+// ---- START: Definition for FixedBottomControls component ----
+interface FixedBottomControlsProps {
+  isInitialAnimationRunning: boolean;
+  showAnimatedButtonsState: boolean;
+  choicesToDisplay?: ChatMessage['choices'];
+  isThinking: boolean;
+  inputValue: string;
+  onInputChange: (value: string) => void;
+  onSendMessage: () => Promise<void>; // Assuming handleSendMessage is async
+  onChoiceClick: (payload: any) => void;
+  onStopAnimationAndShowMessage: (showLastFullMessage?: boolean) => void;
+  disableInteraction: boolean;
+  smallScreenMargin: string;
+  largeScreenMarginClass: string;
+}
+
+const FixedBottomControls = memo<FixedBottomControlsProps>(({ 
+  isInitialAnimationRunning,
+  showAnimatedButtonsState,
+  choicesToDisplay,
+  isThinking,
+  inputValue,
+  onInputChange,
+  onSendMessage,
+  onChoiceClick,
+  onStopAnimationAndShowMessage,
+  disableInteraction,
+  smallScreenMargin,
+  largeScreenMarginClass
+}) => {
+  // This component now contains the JSX for buttons and input area
+  return (
+    <>
+      {/* Unified Button Display Area */}
+      { (
+        (isInitialAnimationRunning && showAnimatedButtonsState && choicesToDisplay && choicesToDisplay.length > 0) ||
+        (!isInitialAnimationRunning && !isThinking && choicesToDisplay && choicesToDisplay.length > 0)
+      ) && (
+        <div className={`flex flex-wrap gap-3 mb-3 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
+          {choicesToDisplay?.map((choice, i) => (
+            <button
+              key={`fc-choice-${i}`}
+              onClick={() => onChoiceClick(choice.payload)}
+              className="px-4 py-2 sm:px-5 sm:py-2.5 border border-slate-700 text-slate-700 rounded-lg hover:bg-slate-700 hover:text-white transition-colors text-sm sm:text-base font-medium"
+            >
+              {choice.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Input Area */}
+      { (
+        isInitialAnimationRunning ||
+        (!isInitialAnimationRunning && !isThinking)
+      ) && (
+        <div className={`space-y-3 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => onInputChange(e.target.value)}
+            onFocus={() => isInitialAnimationRunning && onStopAnimationAndShowMessage(true)}
+            onKeyPress={(e) => {
+                if (e.key === 'Enter' && inputValue.trim()) {
+                    if (isInitialAnimationRunning) onStopAnimationAndShowMessage(true);
+                    onSendMessage();
+                } else if (isInitialAnimationRunning) {
+                    onStopAnimationAndShowMessage(true);
+                }
+            }}
+            placeholder={isInitialAnimationRunning ? "Interact to begin..." : "Type here..."} 
+            className="w-full p-3 bg-transparent text-gray-800 focus:outline-none transition-colors text-base sm:text-lg md:text-xl placeholder-gray-500"
+            disabled={disableInteraction}
+          />
+          {inputValue.trim() && ( 
+            <div className="flex justify-start items-center"> 
+              <button
+                onClick={() => {
+                    if (isInitialAnimationRunning) onStopAnimationAndShowMessage(true);
+                    if(inputValue.trim()) onSendMessage();
+                }}
+                disabled={!inputValue.trim() || disableInteraction} 
+                className="px-5 py-2.5 sm:px-7 sm:py-3 bg-slate-700 text-white rounded-full hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-opacity-50 disabled:opacity-50 transition-colors text-sm sm:text-base font-medium shadow-sm"
+              >
+                Send
+              </button>
+              <p className="ml-3 sm:ml-4 self-center text-xs sm:text-base text-gray-500">Or Press Enter</p>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+});
+FixedBottomControls.displayName = 'FixedBottomControls'; // For better debugging
+// ---- END: Definition for FixedBottomControls component ----
+
 export default function Chatbot() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -40,6 +137,23 @@ export default function Chatbot() {
   const eventSourceRef = useRef<EventSource | null>(null)
   const [isAiTextAnimationComplete, setIsAiTextAnimationComplete] = useState(true);
   const [currentAnimatingText, setCurrentAnimatingText] = useState<string | null>(null);
+
+  // ---- START: New state and constants for initial animation ----
+  const ANIMATION_HEADER = "Unlock New Channels With AI Marketing Solutions";
+  const ANIMATION_DESCRIPTION = "Boost your growth while you sleep. Our AI-powered platform helps founders and marketing managers automate campaigns across channels.";
+  const [dynamicAnimatedMessages, setDynamicAnimatedMessages] = useState<string[]>([]);
+  const [isHeaderTitleAnimationComplete, setIsHeaderTitleAnimationComplete] = useState(false);
+
+  const [animationCycleIndex, setAnimationCycleIndex] = useState(-1); // -1 for header/desc, 0+ for dynamicAnimatedMessages
+  const [currentAnimatedTextContent, setCurrentAnimatedTextContent] = useState<{ title?: string; description?: string; isDescriptionStage?: boolean }>({}); // Only text parts for animation
+  const [currentAnimatedChoices, setCurrentAnimatedChoices] = useState<ChatMessage['choices'] | undefined>(undefined);
+  const [showAnimatedButtonsState, setShowAnimatedButtonsState] = useState(false);
+  const [isInitialAnimationRunning, setIsInitialAnimationRunning] = useState(true);
+  const [initialVoiceflowPayloadForAnimation, setInitialVoiceflowPayloadForAnimation] = useState<ChatMessage | null>(null);
+  const [interimAnimationTextParts, setInterimAnimationTextParts] = useState<string[]>([]); // New state
+  const animationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const textAnimationCompleteTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // ---- END: New state and constants for initial animation ----
 
   const projectID = process.env.NEXT_PUBLIC_VOICEFLOW_PROJECT_ID;
   const apiKey = process.env.NEXT_PUBLIC_VOICEFLOW_API_KEY;
@@ -56,10 +170,12 @@ export default function Chatbot() {
   const handleTraceEvent = (trace: any) => {
     switch (trace.type) {
       case 'text':
+        console.log('trace.payload', trace.payload);
       case 'speak':
         setMessages((prev) => [...prev, { type: 'ai', text: trace.payload.message }])
         break
       case 'choice': 
+        console.log('trace.payload', trace.payload);
         if (trace.payload && Array.isArray(trace.payload.buttons)) {
           const newChoices = trace.payload.buttons.map((button: any) => ({
             label: button.name,
@@ -158,17 +274,20 @@ export default function Chatbot() {
   }
 
   useEffect(() => {
-    if (!hasInteracted) {
+    if (!hasInteracted && !isInitialAnimationRunning) {
       sendInteraction(LAUNCH_ACTION);
       setHasInteracted(true);
     }
     return () => { if (eventSourceRef.current) eventSourceRef.current.close(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hasInteracted, isInitialAnimationRunning]);
 
   const handleSendMessage = async (messageText?: string, customPayload?: any) => {
     const textToSend = messageText || inputValue;
     const interactionAction = customPayload ? customPayload : { type: 'text', payload: textToSend };
+    if (isInitialAnimationRunning) {
+      stopInitialAnimationAndTransition();
+    }
     if (!customPayload && textToSend.trim()) {
       setMessages((prev) => [...prev, { type: 'user', text: textToSend }])
     }
@@ -317,228 +436,487 @@ export default function Chatbot() {
     }
   }, [lastMessage?.text, lastMessage?.type, currentAnimatingText]);
 
+  // ---- START: New functions and useEffects for initial animation ----
+  const stopInitialAnimationAndTransition = useCallback((showLastFullMessage = false) => {
+    if (isInitialAnimationRunning) {
+      setIsInitialAnimationRunning(false);
+      if (animationTimerRef.current) clearTimeout(animationTimerRef.current);
+      if (textAnimationCompleteTimerRef.current) clearTimeout(textAnimationCompleteTimerRef.current);
+      
+      // Reset button state when stopping the animation completely
+      setShowAnimatedButtonsState(false);
+      
+      if (showLastFullMessage && initialVoiceflowPayloadForAnimation) {
+        setMessages([initialVoiceflowPayloadForAnimation]); // Show the full initial message
+      } else if (!initialVoiceflowPayloadForAnimation && !hasInteracted) {
+        // If animation was interrupted before payload fetch, and no prior interaction, trigger normal launch
+        setMessages([]);
+        sendInteraction(LAUNCH_ACTION);
+      }
+      // If payload exists and not showing full message, normal UI will take over, expecting user input or further action.
+      // If messages are already populated from a previous stop, this won't overwrite them unless showLastFullMessage is true.
+      setHasInteracted(true); 
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInitialAnimationRunning, initialVoiceflowPayloadForAnimation, hasInteracted]); // sendInteraction, LAUNCH_ACTION are stable
+
+
+  useEffect(() => {
+    // This effect fetches the initial Voiceflow payload for button display during animation
+    const fetchInitialPayloadForAnimation = async () => {
+      if (!projectID || !apiKey || initialVoiceflowPayloadForAnimation || !isInitialAnimationRunning || hasInteracted) {
+        // If animation is not running, or payload already fetched, or user has already initiated normal interaction.
+        // Note: `hasInteracted` is set to true by this effect itself after sendInteraction.
+        // It's also set by the original launch effect if animation is skipped.
+        return;
+      }
+      // This is where the animation takes control of the first LAUNCH_ACTION
+      sendInteraction(LAUNCH_ACTION);
+      setHasInteracted(true); // Mark that interaction (for animation) has been initiated.
+    };
+
+    if (isInitialAnimationRunning && !initialVoiceflowPayloadForAnimation && !hasInteracted) {
+      fetchInitialPayloadForAnimation();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInitialAnimationRunning, initialVoiceflowPayloadForAnimation, projectID, apiKey, hasInteracted]);
+
+
+  useEffect(() => {
+    if (!isInitialAnimationRunning || initialVoiceflowPayloadForAnimation) {
+      // Animation not running or payload already captured
+      if(interimAnimationTextParts.length > 0 && !initialVoiceflowPayloadForAnimation && !isInitialAnimationRunning) {
+          // Animation was stopped before choices arrived. Form a payload with available text.
+          const collectedFullText = interimAnimationTextParts.join(' ');
+          setInitialVoiceflowPayloadForAnimation({
+              type: 'ai',
+              text: collectedFullText,
+              choices: undefined // No choices were captured before stop
+          });
+          if (collectedFullText) {
+            const sentences = collectedFullText.match(/[^.!?]+[.!?\r\n]+/g) || [collectedFullText];
+            setDynamicAnimatedMessages(sentences.slice(0, 3).map(s => s.trim()).filter(s => s.length > 0));
+          } else {
+            setDynamicAnimatedMessages([]);
+          }
+          setInterimAnimationTextParts([]); // Clear interim
+          setMessages([]); // Clear any accumulated messages from UI
+      }
+      return;
+    }
+  
+    // This effect now processes messages to build the initial animation payload, waiting for choices.
+    if (messages.length > 0) {
+      let collectedTextParts = [...interimAnimationTextParts];
+      let foundChoicesPayload: ChatMessage['choices'] | undefined = undefined;
+      let processedAllCurrentMessages = true; // Assume we process all unless choices are found sooner
+  
+      for (const msg of messages) {
+          if (msg.type === 'ai') {
+              // Add text if it's new (simple check, might need refinement for complex cases)
+              if (msg.text && !collectedTextParts.some(part => part.includes(msg.text!))) {
+                  collectedTextParts.push(msg.text);
+              }
+              if (msg.choices && msg.choices.length > 0) {
+                  foundChoicesPayload = msg.choices;
+                  // Once choices are found, we consider this the end of the initial payload gathering for animation
+                  break; 
+              }
+          }
+      }
+      
+      // Update interim text parts regardless of finding choices yet, as more text might come before choices
+      setInterimAnimationTextParts(collectedTextParts);
+  
+      if (foundChoicesPayload) {
+        const fullInitialText = collectedTextParts.join(' ');
+        setInitialVoiceflowPayloadForAnimation({
+          type: 'ai',
+          text: fullInitialText,
+          choices: foundChoicesPayload,
+        });
+        setCurrentAnimatedChoices(foundChoicesPayload);
+  
+        if (fullInitialText) {
+          const sentences = fullInitialText.match(/[^.!?]+[.!?\r\n]+/g) || [fullInitialText];
+          setDynamicAnimatedMessages(sentences.slice(0, 3).map(s => s.trim()).filter(s => s.length > 0));
+        } else {
+          setDynamicAnimatedMessages([]);
+        }
+        setInterimAnimationTextParts([]); // Clear interim storage
+        setMessages([]); // Clear all Voiceflow messages from main display as animation will take over
+      } else {
+        // Still waiting for choices, or only text messages received so far.
+        // We don't clear `messages` here yet, as they are the source for `interimAnimationTextParts`.
+        // If LAUNCH_ACTION only sends text and never choices, animation might not start as intended
+        // or will start with no buttons if eventually stopped.
+      }
+    }
+  }, [messages, isInitialAnimationRunning, initialVoiceflowPayloadForAnimation, interimAnimationTextParts]);
+
+
+  useEffect(() => {
+    if (!isInitialAnimationRunning || !initialVoiceflowPayloadForAnimation) {
+      return;
+    }
+
+    // Clear previous timeouts
+    if (animationTimerRef.current) clearTimeout(animationTimerRef.current);
+    if (textAnimationCompleteTimerRef.current) clearTimeout(textAnimationCompleteTimerRef.current);
+    
+    let textContentForAnimation: { title?: string; description?: string; isDescriptionStage?: boolean } = {};
+
+    if (animationCycleIndex === -1) { // Header/Description stage
+      if (!isHeaderTitleAnimationComplete) {
+        // Stage 1.1: Animate Header Title
+        textContentForAnimation = { title: ANIMATION_HEADER, isDescriptionStage: false };
+        setCurrentAnimatedTextContent(textContentForAnimation);
+        // onAnimationComplete for title will set isHeaderTitleAnimationComplete(true)
+      } else {
+        // Stage 1.2: Animate Description (after title is complete)
+        // Header title remains visible, description animates below it.
+        textContentForAnimation = { title: ANIMATION_HEADER, description: ANIMATION_DESCRIPTION, isDescriptionStage: true };
+        setCurrentAnimatedTextContent(textContentForAnimation);
+        // onAnimationComplete for description will trigger button display and then timeout to next cycle.
+      }
+    } else { // Dynamic messages stage
+      // Header and Description should not be visible here.
+      // isHeaderTitleAnimationComplete is reset when cycling back to header or moving to dynamic messages.
+      if (dynamicAnimatedMessages.length > 0 && animationCycleIndex < dynamicAnimatedMessages.length) {
+        const msgText = dynamicAnimatedMessages[animationCycleIndex];
+        textContentForAnimation = { title: msgText };
+        setCurrentAnimatedTextContent(textContentForAnimation);
+      } else {
+        // Loop back if no dynamic messages or index out of bounds.
+        // This means we are trying to display a dynamic message but can't.
+        // Reset to header animation.
+        setCurrentAnimatedTextContent({}); // Clear text before looping
+        setIsHeaderTitleAnimationComplete(false); 
+        setAnimationCycleIndex(-1); 
+        return; 
+      }
+    }
+    return () => {
+      // Cleanup timers
+      if (animationTimerRef.current) clearTimeout(animationTimerRef.current);
+      if (textAnimationCompleteTimerRef.current) clearTimeout(textAnimationCompleteTimerRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animationCycleIndex, isInitialAnimationRunning, initialVoiceflowPayloadForAnimation, dynamicAnimatedMessages.length, isHeaderTitleAnimationComplete]); // dynamicAnimatedMessages.length added
+
+  const handleHeaderTitleAnimComplete = () => {
+    if (animationCycleIndex === -1 && !isHeaderTitleAnimationComplete && isInitialAnimationRunning) {
+      setIsHeaderTitleAnimationComplete(true); // Triggers description animation
+    }
+  };
+  
+  const handleDescriptionAnimComplete = () => {
+    if (animationCycleIndex === -1 && isHeaderTitleAnimationComplete && isInitialAnimationRunning) {
+      // Set this only once when first needed - not on every animation cycle
+      if (!showAnimatedButtonsState) {
+        setShowAnimatedButtonsState(true);
+      }
+      
+      animationTimerRef.current = setTimeout(() => {
+        setCurrentAnimatedTextContent({}); 
+        setIsHeaderTitleAnimationComplete(false); 
+        if (dynamicAnimatedMessages.length > 0) {
+          setAnimationCycleIndex(0); 
+        } else {
+          setAnimationCycleIndex(-1); 
+        }
+      }, 2000); 
+    }
+  };
+
+  const handleDynamicMessageAnimComplete = () => {
+    if (animationCycleIndex !== -1 && isInitialAnimationRunning) {
+      // Set this only once when first needed - not on every animation cycle
+      if (!showAnimatedButtonsState) {
+        setShowAnimatedButtonsState(true);
+      }
+      
+      animationTimerRef.current = setTimeout(() => {
+        if (animationCycleIndex < dynamicAnimatedMessages.length - 1) {
+          setAnimationCycleIndex(prev => prev + 1); 
+        } else {
+          setCurrentAnimatedTextContent({}); 
+          setIsHeaderTitleAnimationComplete(false); 
+          setAnimationCycleIndex(-1); 
+        }
+      }, 1500); 
+    }
+  };
+
+
+  // ---- END: New functions and useEffects for initial animation ----
+
+  // Wrapper for choice click to also stop animation
+  const handleAnimatedChoiceClick = (choicePayload: any) => {
+    stopInitialAnimationAndTransition(); // Stop animation, but don't necessarily show full message
+    if (choicePayload && choicePayload.request) {
+        handleChoiceClick(choicePayload); // Pass the whole payload which contains .request
+    } else if (choicePayload) { 
+        // If the structure is flatter, or it IS the request itself
+        // This case might need adjustment based on actual payload structure if it differs
+        sendInteraction(choicePayload); 
+    }
+  };
+
   return (
-    <div className="flex flex-col w-full space-y-4"> 
-      <div className="min-h-[120px]">
-        {/* Thinking Indicator - Rendered if isThinking is true */}
-        {isThinking && thinkingIndicator}
-
-        {/* User Message - Rendered if the last message is from the user */}
-        {lastMessage && lastMessage.type === 'user' && (
-          <div className={`pt-4 pb-2 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-sky-600">
-              You: {lastMessage.text}
-            </h2>
-          </div>
-        )}
-
-        {/* AI Message Content - Rendered only if not thinking and last message is AI */}
-        {lastMessage && lastMessage.type === 'ai' && !isThinking && (
-          <div className={`pt-4 pb-2 transition-opacity duration-300 ${inputValue.trim() ? 'opacity-50' : 'opacity-100'}`}> 
-            {lastMessage.text && (
-              <div className={`flex-grow ${smallScreenMargin} ${largeScreenMarginClass}`}> 
-                {(() => {
-                  const styles = getAiMessageStyles(lastMessage.text);
-                  const combinedClassName = `${styles.size} ${styles.weight} text-gray-800`;
-
-                  if (!isAiTextAnimationComplete && lastMessage.text === currentAnimatingText) {
-                    return (
-                      <TextGenerateEffect 
-                        key={currentAnimatingText}
-                        words={currentAnimatingText!} 
-                        className={combinedClassName}
-                        duration={0.5} 
-                        staggerDuration={0.05}
-                        filter={true} 
-                        as="div" 
-                        onAnimationComplete={() => {
-                          if (lastMessage.text === currentAnimatingText) {
-                            setIsAiTextAnimationComplete(true);
-                          }
-                        }}
-                      />
-                    );
-                  } else {
-                    return (
-                      <div className={combinedClassName}>
-                        <ReactMarkdown>{lastMessage.text}</ReactMarkdown>
-                      </div>
-                    );
-                  }
-                })()}
-              </div>
+    <div 
+      className="flex flex-col w-full space-y-4 min-h-[350px]"
+      // onClick={isInitialAnimationRunning ? () => stopInitialAnimationAndTransition() : undefined}
+      // onFocus within input is preferred for stopping via focus
+    >
+      {/* ===== 1. TOP AREA: Animated Text / Chat Messages / Thinking Indicator ===== */}
+      <div className="flex-grow min-h-[100px]"> {/* Ensures this area takes up space and pushes bottom content down */}
+        {isInitialAnimationRunning && initialVoiceflowPayloadForAnimation ? (
+          <div className={`pt-4 pb-2 transition-opacity duration-300 ${smallScreenMargin} ${largeScreenMarginClass}`}>
+            {/* Animated Header Title - Renders only if title is set and it's header stage part 1 */}
+            {currentAnimatedTextContent.title && animationCycleIndex === -1 && !currentAnimatedTextContent.isDescriptionStage && (
+              <TextGenerateEffect
+                key={currentAnimatedTextContent.title + '-header-title'}
+                words={currentAnimatedTextContent.title}
+                className={`${getAiMessageStyles(currentAnimatedTextContent.title).size} ${getAiMessageStyles(currentAnimatedTextContent.title).weight} text-gray-800 whitespace-pre-wrap`}
+                duration={0.5}
+                staggerDuration={0.02}
+                filter={false}
+                as="div"
+                onAnimationComplete={handleHeaderTitleAnimComplete}
+              />
             )}
-            {/* AI Choices */} 
-            {lastMessage.choices && (
-              <div className={`flex flex-wrap gap-3 mt-4 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
-                {lastMessage.choices.map((choice, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleChoiceClick(choice.payload)}
-                    className="px-4 py-2 sm:px-5 sm:py-2.5 border border-slate-700 text-slate-700 rounded-lg hover:bg-slate-700 hover:text-white transition-colors text-sm sm:text-base font-medium"
-                  >
-                    {choice.label}
-                  </button>
-                ))}
-              </div>
-            )}
-            {/* AI Carousel */} 
-            {lastMessage.carousel && (
-              <div className="relative pt-6">
-                {/* Carousel Scroll Container */} 
-                <div 
-                  ref={carouselContainerRef} 
-                  className="mt-4 overflow-x-auto pb-4 scroll-smooth no-scrollbar scroll-pl-2 sm:scroll-pl-4 md:scroll-pl-6 lg:scroll-pl-10 xl:scroll-pl-16"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} // Force hide scrollbar
-                > 
-                  <style jsx global>{`
-                    .no-scrollbar::-webkit-scrollbar {
-                      display: none;
-                    }
-                  `}</style>
-                  <div className="flex space-x-3 sm:space-x-4 md:space-x-6 px-2 sm:px-4 md:px-6 lg:px-10 xl:px-16"> 
-                    {lastMessage.carousel.map((card, index) => {
-                      const isActive = index === activeIndex;
-                      const buttonColClass = card.buttons.length === 1 ? 'grid-cols-1' : 
-                                               card.buttons.length === 2 ? 'grid-cols-2' : 
-                                               'grid-cols-3'; 
-                      return (
-                        // Wrapper Div for Card + Overlay
-                        <div
-                          key={`${card.id}-wrapper`}
-                          className={`relative flex-shrink-0 w-[85vw] sm:w-64 md:w-72 pt-8 transition-all duration-300 ease-out transform ${ 
-                            isActive ? 'opacity-100 scale-105 z-10' : 'opacity-60 scale-95 z-0' 
-                          }`}
-                        >
-                          {/* Logo + ID Overlay */} 
-                          <div className={`absolute top-0.5 left-4 z-20 flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full transition-all duration-300 ease-out ${isActive ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}> 
-                            <Image 
-                              src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/logo.png" 
-                              alt="Logo" 
-                              width={24} 
-                              height={24} 
-                              className="w-6 h-6"
-                            />
-                            <span className="text-sm font-semibold text-gray-700">ID: {card.id}</span>
-                          </div>
-                          {/* Actual Card Content Div */} 
-                          <div 
-                            id={`carousel-card-${index}`}
-                            className="w-full h-auto aspect-[3/4] bg-white rounded-xl overflow-hidden shadow-xl flex flex-col"
-                          >
-                            {card.imageUrl && (
-                              <div className="relative w-full aspect-[16/10] flex-shrink-0 bg-gray-100">
-                                <Image 
-                                  src={card.imageUrl} 
-                                  alt={card.title}
-                                  fill={true}
-                                  className="object-cover"
-                                  sizes="(max-width: 640px) 80vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 288px"
-                                />
-                              </div>
-                            )}
-                            <div className="p-4 flex flex-col flex-grow"> 
-                              <h4 className="font-semibold text-base text-gray-800 truncate mb-2">{card.title}</h4> 
-                              <div className={`mt-auto grid ${buttonColClass} gap-2 pt-2 border-t border-gray-100`}> 
-                                {card.buttons.map((button, i) => (
-                                  <button
-                                    key={i}
-                                    onClick={() => handleCarouselButtonClick(button.payload)} 
-                                    className="text-center px-2 py-1.5 text-slate-700 hover:bg-slate-100 rounded transition-colors text-xs font-medium truncate"
-                                  >
-                                    {button.label}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+            {/* Animated Description - Renders only if description is set and it's header stage part 2 */}
+            {currentAnimatedTextContent.description && animationCycleIndex === -1 && currentAnimatedTextContent.isDescriptionStage && (
+              <>
+                {/* Static Header Title (already animated and visible) */}
+                <div className={`${getAiMessageStyles(ANIMATION_HEADER).size} ${getAiMessageStyles(ANIMATION_HEADER).weight} text-gray-800 whitespace-pre-wrap mb-2`}>
+                  {ANIMATION_HEADER}
                 </div>
-                {/* Dots Navigation */}
-                {(lastMessage.carousel.length ?? 0) > 1 && (
-                  <div className="hidden sm:flex justify-center items-center space-x-2 pt-4 mt-2">
-                    {lastMessage.carousel.map((_, index) => (
-                      <button
-                        key={`dot-${index}`}
-                        onClick={() => {
-                          setActiveIndex(index);
-                          scrollToCard(index);
-                        }}
-                        aria-label={`Go to card ${index + 1}`}
-                        className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ease-out
-                                    ${activeIndex === index ? 'bg-slate-700 scale-125' : 'bg-gray-300 hover:bg-gray-400'}
-                                    focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 p-1 sm:p-0.5 box-content`}
-                      />
-                    ))}
-                  </div>
-                )}
-                {/* Prev/Next Buttons */} 
-                {activeIndex > 0 && (
-                  <button 
-                    onClick={handlePrevClick}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md ml-1 sm:ml-2"
-                    aria-label="Previous Card"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                    </svg>
-                  </button>
-                )}
-                {(messages[messages.length - 1]?.carousel?.length ?? 0) > 1 && activeIndex < (messages[messages.length - 1]?.carousel?.length ?? 0) - 1 && (
-                  <button 
-                    onClick={handleNextClick}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md mr-1 sm:mr-2"
-                    aria-label="Next Card"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                    </svg>
-                  </button>
-                )}
-              </div>
+                <TextGenerateEffect
+                  key={currentAnimatedTextContent.description + '-header-desc'}
+                  words={currentAnimatedTextContent.description}
+                  className="text-base sm:text-lg md:text-xl text-gray-700 whitespace-pre-wrap"
+                  duration={0.5}
+                  staggerDuration={0.015}
+                  filter={false}
+                  as="div"
+                  onAnimationComplete={handleDescriptionAnimComplete} 
+                />
+              </>
+            )}
+            {/* Animated Dynamic Message - Renders if title is set and it's dynamic message stage */}
+            {currentAnimatedTextContent.title && animationCycleIndex !== -1 && (
+               <TextGenerateEffect
+                key={currentAnimatedTextContent.title + `-dynamic-msg-${animationCycleIndex}`}
+                words={currentAnimatedTextContent.title}
+                className={`${getAiMessageStyles(currentAnimatedTextContent.title).size} ${getAiMessageStyles(currentAnimatedTextContent.title).weight} text-gray-800 whitespace-pre-wrap`}
+                duration={0.5}
+                staggerDuration={0.02}
+                filter={false}
+                as="div"
+                onAnimationComplete={handleDynamicMessageAnimComplete}
+              />
             )}
           </div>
-        )}
-
-        {/* System Message - Rendered only if not thinking and last message is system */}
-        {lastMessage && lastMessage.type === 'system' && !isThinking && (
-             <div className={`pt-4 pb-2 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
-                <h2 className="text-md sm:text-lg italic text-red-600">
-                    {lastMessage.text}
+        ) : isThinking ? (
+          thinkingIndicator
+        ) : (
+          // Normal Chat Message Display (User or AI)
+          <>
+            {lastMessage && lastMessage.type === 'user' && (
+              <div className={`pt-4 pb-2 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-sky-600">
+                  You: {lastMessage.text}
                 </h2>
-             </div>
+              </div>
+            )}
+            {lastMessage && lastMessage.type === 'ai' && ( // Removed !isThinking here as parent checks isThinking
+              <div className={`pt-4 pb-2 transition-opacity duration-300 ${inputValue.trim() ? 'opacity-50' : 'opacity-100'}`}> 
+                {lastMessage.text && (
+                  <div className={`flex-grow ${smallScreenMargin} ${largeScreenMarginClass}`}> 
+                    {(() => {
+                      const styles = getAiMessageStyles(lastMessage.text);
+                      const combinedClassName = `${styles.size} ${styles.weight} text-gray-800`;
+
+                      if (!isAiTextAnimationComplete && lastMessage.text === currentAnimatingText) {
+                        return (
+                          <TextGenerateEffect 
+                            key={currentAnimatingText}
+                            words={currentAnimatingText!} 
+                            className={combinedClassName}
+                            duration={0.5} 
+                            staggerDuration={0.05}
+                            filter={true} 
+                            as="div" 
+                            onAnimationComplete={() => {
+                              if (lastMessage.text === currentAnimatingText) {
+                                setIsAiTextAnimationComplete(true);
+                              }
+                            }}
+                          />
+                        );
+                      } else {
+                        return (
+                          <div className={combinedClassName}>
+                            <ReactMarkdown>{lastMessage.text}</ReactMarkdown>
+                          </div>
+                        );
+                      }
+                    })()}
+                  </div>
+                )}
+                {/* AI Choices for normal chat - rendered below if not in animation */}
+                {/* This will be handled by the unified button section below */}
+              </div>
+            )}
+            {lastMessage && lastMessage.type === 'system' && ( // Removed !isThinking
+                 <div className={`pt-4 pb-2 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
+                    <h2 className="text-md sm:text-lg italic text-red-600">
+                        {lastMessage.text}
+                    </h2>
+                 </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Input Area - Conditionally rendered based on !isThinking */}
-      { !isThinking && (
-        <div className={`mt-auto space-y-3 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && !isThinking && inputValue.trim() && handleSendMessage()}
-            placeholder="Type here..." 
-            className="w-full p-3 bg-transparent text-gray-800 focus:outline-none transition-colors text-base sm:text-lg md:text-xl placeholder-gray-500"
-            disabled={isThinking} // This disabled prop is technically redundant now but harmless
-          />
-          {inputValue.trim() && !isThinking && ( // This !isThinking is also redundant due to the parent conditional, but harmless
-            <div className="flex justify-start items-center"> 
-              <button
-                onClick={() => inputValue.trim() && handleSendMessage()}
-                disabled={isThinking || !inputValue.trim()} 
-                className="px-5 py-2.5 sm:px-7 sm:py-3 bg-slate-700 text-white rounded-full hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-opacity-50 disabled:opacity-50 transition-colors text-sm sm:text-base font-medium shadow-sm"
-              >
-                Send
-              </button>
-              <p className="ml-3 sm:ml-4 self-center text-xs sm:text-base text-gray-500">Or Press Enter</p>
+      {/* Unified Carousel Display Area: Positioned after main text, before fixed bottom elements */}
+      { !isInitialAnimationRunning && !isThinking && lastMessage?.carousel && (
+        <div className="relative py-6"> {/* Added py-6 for vertical spacing around carousel */}
+            {/* Carousel Scroll Container */} 
+            <div 
+              ref={carouselContainerRef} 
+              className="mt-4 overflow-x-auto pb-4 scroll-smooth no-scrollbar scroll-pl-2 sm:scroll-pl-4 md:scroll-pl-6 lg:scroll-pl-10 xl:scroll-pl-16"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} // Force hide scrollbar
+            > 
+              <style jsx global>{`
+                .no-scrollbar::-webkit-scrollbar {
+                  display: none;
+                }
+              `}</style>
+              <div className="flex space-x-3 sm:space-x-4 md:space-x-6 px-2 sm:px-4 md:px-6 lg:px-10 xl:px-16"> 
+                {lastMessage.carousel.map((card, index) => {
+                  const isActive = index === activeIndex;
+                  const buttonColClass = card.buttons.length === 1 ? 'grid-cols-1' : 
+                                           card.buttons.length === 2 ? 'grid-cols-2' : 
+                                           'grid-cols-3'; 
+                  return (
+                    // Wrapper Div for Card + Overlay
+                    <div
+                      key={`${card.id}-wrapper`}
+                      className={`relative flex-shrink-0 w-[85vw] sm:w-64 md:w-72 pt-8 transition-all duration-300 ease-out transform ${ 
+                        isActive ? 'opacity-100 scale-105 z-10' : 'opacity-60 scale-95 z-0' 
+                      }`}
+                    >
+                      {/* Logo + ID Overlay */} 
+                      <div className={`absolute top-0.5 left-4 z-20 flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full transition-all duration-300 ease-out ${isActive ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}> 
+                        <Image 
+                          src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/logo.png" 
+                          alt="Logo" 
+                          width={24} 
+                          height={24} 
+                          className="w-6 h-6"
+                        />
+                        <span className="text-sm font-semibold text-gray-700">ID: {card.id}</span>
+                      </div>
+                      {/* Actual Card Content Div */} 
+                      <div 
+                        id={`carousel-card-${index}`}
+                        className="w-full h-auto aspect-[3/4] bg-white rounded-xl overflow-hidden shadow-xl flex flex-col"
+                      >
+                        {card.imageUrl && (
+                          <div className="relative w-full aspect-[16/10] flex-shrink-0 bg-gray-100">
+                            <Image 
+                              src={card.imageUrl} 
+                              alt={card.title}
+                              fill={true}
+                              className="object-cover"
+                              sizes="(max-width: 640px) 80vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 288px"
+                            />
+                          </div>
+                        )}
+                        <div className="p-4 flex flex-col flex-grow"> 
+                          <h4 className="font-semibold text-base text-gray-800 truncate mb-2">{card.title}</h4> 
+                          <div className={`mt-auto grid ${buttonColClass} gap-2 pt-2 border-t border-gray-100`}> 
+                            {card.buttons.map((button, i) => (
+                              <button
+                                key={i}
+                                onClick={() => handleCarouselButtonClick(button.payload)} 
+                                className="text-center px-2 py-1.5 text-slate-700 hover:bg-slate-100 rounded transition-colors text-xs font-medium truncate"
+                              >
+                                {button.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          )}
+            {/* Dots Navigation */}
+            {(lastMessage.carousel.length ?? 0) > 1 && (
+              <div className="hidden sm:flex justify-center items-center space-x-2 pt-4 mt-2">
+                {lastMessage.carousel.map((_, index) => (
+                  <button
+                    key={`dot-${index}`}
+                    onClick={() => {
+                      setActiveIndex(index);
+                      scrollToCard(index);
+                    }}
+                    aria-label={`Go to card ${index + 1}`}
+                    className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ease-out
+                                      ${activeIndex === index ? 'bg-slate-700 scale-125' : 'bg-gray-300 hover:bg-gray-400'}
+                                      focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 p-1 sm:p-0.5 box-content`}
+                  />
+                ))}
+              </div>
+            )}
+            {/* Prev/Next Buttons */} 
+            {activeIndex > 0 && (
+              <button 
+                onClick={handlePrevClick}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md ml-1 sm:ml-2"
+                aria-label="Previous Card"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+            )}
+            {(messages[messages.length - 1]?.carousel?.length ?? 0) > 1 && activeIndex < (messages[messages.length - 1]?.carousel?.length ?? 0) - 1 && (
+              <button 
+                onClick={handleNextClick}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md mr-1 sm:mr-2"
+                aria-label="Next Card"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            )}
         </div>
       )}
+
+      {/* ===== 2. BOTTOM AREA: Fixed Interactive Elements (Buttons, Input) ===== */}
+      <div className="mt-auto pt-4"> {/* mt-auto pushes this block to the bottom, pt-4 for spacing */}
+        <FixedBottomControls 
+          isInitialAnimationRunning={isInitialAnimationRunning}
+          showAnimatedButtonsState={showAnimatedButtonsState}
+          choicesToDisplay={isInitialAnimationRunning ? currentAnimatedChoices : lastMessage?.choices}
+          isThinking={isThinking} // Pass isThinking for normal chat mode button/input disabling
+          inputValue={inputValue}
+          onInputChange={setInputValue} // Direct state setter
+          onSendMessage={handleSendMessage} // Pass the existing handler
+          onChoiceClick={isInitialAnimationRunning ? handleAnimatedChoiceClick : handleChoiceClick} // Conditional handler
+          onStopAnimationAndShowMessage={stopInitialAnimationAndTransition} // Pass the existing handler
+          disableInteraction={(isInitialAnimationRunning && !initialVoiceflowPayloadForAnimation) || isThinking}
+          smallScreenMargin={smallScreenMargin}
+          largeScreenMarginClass={largeScreenMarginClass}
+        />
+      </div> 
     </div>
   )
 } 
