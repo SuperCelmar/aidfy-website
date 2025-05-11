@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import Image from 'next/image'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { TextGenerateEffect } from '@/components/ui/text-generate-effect'
@@ -36,6 +36,7 @@ export default function Chatbot() {
   const [currentUserID] = useState('unique-user-id-' + Date.now())
   const [activeIndex, setActiveIndex] = useState(0);
   const carouselContainerRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null); // For debouncing scroll
   const eventSourceRef = useRef<EventSource | null>(null)
   const [isAiTextAnimationComplete, setIsAiTextAnimationComplete] = useState(true);
   const [currentAnimatingText, setCurrentAnimatingText] = useState<string | null>(null);
@@ -49,6 +50,8 @@ export default function Chatbot() {
   // Declare lastMessage *before* useEffect that uses it
   const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
   const logoWidthPlusGap = '[calc(2rem+0.75rem)]';
+  const smallScreenMargin = 'ml-4';
+  const largeScreenMarginClass = `sm:ml-${logoWidthPlusGap}`;
 
   const handleTraceEvent = (trace: any) => {
     switch (trace.type) {
@@ -216,15 +219,75 @@ export default function Chatbot() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastMessage?.carousel]); 
 
+  // Debounce utility
+  const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
+    let timeout: NodeJS.Timeout | null = null;
+
+    const debounced = (...args: Parameters<F>) => {
+      if (timeout !== null) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+      timeout = setTimeout(() => func(...args), waitFor);
+    };
+
+    return debounced as (...args: Parameters<F>) => ReturnType<F>;
+  };
+
+  const handleScroll = useCallback(() => {
+    if (!carouselContainerRef.current || !lastMessage?.carousel || lastMessage.carousel.length === 0) {
+      return;
+    }
+
+    const container = carouselContainerRef.current;
+    const containerScrollLeft = container.scrollLeft;
+    const containerWidth = container.offsetWidth;
+    const containerCenter = containerScrollLeft + containerWidth / 2;
+
+    let closestCardIndex = 0;
+    let smallestDistance = Infinity;
+
+    lastMessage.carousel.forEach((_, index) => {
+      const cardElement = document.getElementById(`carousel-card-${index}`);
+      if (cardElement) {
+        const cardOffsetLeft = cardElement.parentElement?.offsetLeft || 0; // Offset of the wrapper
+        const cardWidth = cardElement.offsetWidth;
+        const cardCenter = cardOffsetLeft + cardWidth / 2;
+        const distance = Math.abs(containerCenter - cardCenter);
+
+        if (distance < smallestDistance) {
+          smallestDistance = distance;
+          closestCardIndex = index;
+        }
+      }
+    });
+
+    if (closestCardIndex !== activeIndex) {
+      setActiveIndex(closestCardIndex);
+    }
+  }, [lastMessage?.carousel, activeIndex]);
+
+  const debouncedScrollHandler = useCallback(debounce(handleScroll, 150), [handleScroll]);
+
+  useEffect(() => {
+    const container = carouselContainerRef.current;
+    if (container && lastMessage?.carousel) {
+      container.addEventListener('scroll', debouncedScrollHandler);
+      return () => {
+        container.removeEventListener('scroll', debouncedScrollHandler);
+      };
+    }
+  }, [lastMessage?.carousel, debouncedScrollHandler]);
+
   const getAiMessageStyles = (text: string | undefined) => {
-    if (!text) return { size: 'text-5xl', weight: 'font-semibold' }; // Default if text is undefined
+    if (!text) return { size: 'text-2xl sm:text-3xl md:text-5xl', weight: 'font-semibold' }; // Default if text is undefined
     const length = text.length;
     if (length < 50) {
-      return { size: 'text-5xl', weight: 'font-semibold' };
+      return { size: 'text-2xl sm:text-3xl md:text-5xl', weight: 'font-semibold' };
     } else if (length < 150) {
-      return { size: 'text-3xl', weight: 'font-medium' };
+      return { size: 'text-xl sm:text-2xl md:text-3xl', weight: 'font-medium' };
     } else {
-      return { size: 'text-xl', weight: 'font-normal' };
+      return { size: 'text-lg sm:text-xl md:text-xl', weight: 'font-normal' };
     }
   };
 
@@ -262,8 +325,8 @@ export default function Chatbot() {
 
         {/* User Message - Rendered if the last message is from the user */}
         {lastMessage && lastMessage.type === 'user' && (
-          <div className={`pt-4 pb-2 ml-${logoWidthPlusGap}`}> 
-            <h2 className="text-3xl font-medium text-sky-600">
+          <div className={`pt-4 pb-2 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-sky-600">
               You: {lastMessage.text}
             </h2>
           </div>
@@ -273,7 +336,7 @@ export default function Chatbot() {
         {lastMessage && lastMessage.type === 'ai' && !isThinking && (
           <div className={`pt-4 pb-2 transition-opacity duration-300 ${inputValue.trim() ? 'opacity-50' : 'opacity-100'}`}> 
             {lastMessage.text && (
-              <div className={`flex-grow ml-${logoWidthPlusGap}`}> 
+              <div className={`flex-grow ${smallScreenMargin} ${largeScreenMarginClass}`}> 
                 {(() => {
                   const styles = getAiMessageStyles(lastMessage.text);
                   const combinedClassName = `${styles.size} ${styles.weight} text-gray-800`;
@@ -307,12 +370,12 @@ export default function Chatbot() {
             )}
             {/* AI Choices */} 
             {lastMessage.choices && (
-              <div className={`flex flex-wrap gap-3 mt-4 ml-${logoWidthPlusGap}`}> 
+              <div className={`flex flex-wrap gap-3 mt-4 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
                 {lastMessage.choices.map((choice, i) => (
                   <button
                     key={i}
                     onClick={() => handleChoiceClick(choice.payload)}
-                    className="px-5 py-2.5 border border-slate-700 text-slate-700 rounded-lg hover:bg-slate-700 hover:text-white transition-colors text-base font-medium"
+                    className="px-4 py-2 sm:px-5 sm:py-2.5 border border-slate-700 text-slate-700 rounded-lg hover:bg-slate-700 hover:text-white transition-colors text-sm sm:text-base font-medium"
                   >
                     {choice.label}
                   </button>
@@ -325,7 +388,7 @@ export default function Chatbot() {
                 {/* Carousel Scroll Container */} 
                 <div 
                   ref={carouselContainerRef} 
-                  className="mt-4 overflow-x-auto pb-4 scroll-smooth no-scrollbar scroll-pl-6 md:scroll-pl-10 lg:scroll-pl-16"
+                  className="mt-4 overflow-x-auto pb-4 scroll-smooth no-scrollbar scroll-pl-2 sm:scroll-pl-4 md:scroll-pl-6 lg:scroll-pl-10 xl:scroll-pl-16"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} // Force hide scrollbar
                 > 
                   <style jsx global>{`
@@ -333,7 +396,7 @@ export default function Chatbot() {
                       display: none;
                     }
                   `}</style>
-                  <div className="flex space-x-6 px-6 md:px-10 lg:px-16"> 
+                  <div className="flex space-x-3 sm:space-x-4 md:space-x-6 px-2 sm:px-4 md:px-6 lg:px-10 xl:px-16"> 
                     {lastMessage.carousel.map((card, index) => {
                       const isActive = index === activeIndex;
                       const buttonColClass = card.buttons.length === 1 ? 'grid-cols-1' : 
@@ -343,7 +406,7 @@ export default function Chatbot() {
                         // Wrapper Div for Card + Overlay
                         <div
                           key={`${card.id}-wrapper`}
-                          className={`relative flex-shrink-0 w-72 pt-8 transition-all duration-300 ease-out transform ${ 
+                          className={`relative flex-shrink-0 w-[85vw] sm:w-64 md:w-72 pt-8 transition-all duration-300 ease-out transform ${ 
                             isActive ? 'opacity-100 scale-105 z-10' : 'opacity-60 scale-95 z-0' 
                           }`}
                         >
@@ -361,16 +424,16 @@ export default function Chatbot() {
                           {/* Actual Card Content Div */} 
                           <div 
                             id={`carousel-card-${index}`}
-                            className="w-full h-96 bg-white rounded-xl overflow-hidden shadow-xl flex flex-col"
+                            className="w-full h-auto aspect-[3/4] bg-white rounded-xl overflow-hidden shadow-xl flex flex-col"
                           >
                             {card.imageUrl && (
-                              <div className="relative w-full h-60 flex-shrink-0 bg-gray-100">
+                              <div className="relative w-full aspect-[16/10] flex-shrink-0 bg-gray-100">
                                 <Image 
                                   src={card.imageUrl} 
                                   alt={card.title}
                                   fill={true}
                                   className="object-cover"
-                                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                                  sizes="(max-width: 640px) 80vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 288px"
                                 />
                               </div>
                             )}
@@ -396,7 +459,7 @@ export default function Chatbot() {
                 </div>
                 {/* Dots Navigation */}
                 {(lastMessage.carousel.length ?? 0) > 1 && (
-                  <div className="flex justify-center items-center space-x-2 pt-4 mt-2">
+                  <div className="hidden sm:flex justify-center items-center space-x-2 pt-4 mt-2">
                     {lastMessage.carousel.map((_, index) => (
                       <button
                         key={`dot-${index}`}
@@ -405,9 +468,9 @@ export default function Chatbot() {
                           scrollToCard(index);
                         }}
                         aria-label={`Go to card ${index + 1}`}
-                        className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ease-out
+                        className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ease-out
                                     ${activeIndex === index ? 'bg-slate-700 scale-125' : 'bg-gray-300 hover:bg-gray-400'}
-                                    focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50`}
+                                    focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 p-1 sm:p-0.5 box-content`}
                       />
                     ))}
                   </div>
@@ -416,7 +479,7 @@ export default function Chatbot() {
                 {activeIndex > 0 && (
                   <button 
                     onClick={handlePrevClick}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white rounded-full p-2 shadow-md ml-2"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md ml-1 sm:ml-2"
                     aria-label="Previous Card"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -427,7 +490,7 @@ export default function Chatbot() {
                 {(messages[messages.length - 1]?.carousel?.length ?? 0) > 1 && activeIndex < (messages[messages.length - 1]?.carousel?.length ?? 0) - 1 && (
                   <button 
                     onClick={handleNextClick}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white rounded-full p-2 shadow-md mr-2"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md mr-1 sm:mr-2"
                     aria-label="Next Card"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -442,8 +505,8 @@ export default function Chatbot() {
 
         {/* System Message - Rendered only if not thinking and last message is system */}
         {lastMessage && lastMessage.type === 'system' && !isThinking && (
-             <div className={`pt-4 pb-2 ml-${logoWidthPlusGap}`}> 
-                <h2 className="text-lg italic text-red-600">
+             <div className={`pt-4 pb-2 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
+                <h2 className="text-md sm:text-lg italic text-red-600">
                     {lastMessage.text}
                 </h2>
              </div>
@@ -452,14 +515,14 @@ export default function Chatbot() {
 
       {/* Input Area - Conditionally rendered based on !isThinking */}
       { !isThinking && (
-        <div className={`mt-auto space-y-3 ml-${logoWidthPlusGap}`}> 
+        <div className={`mt-auto space-y-3 ${smallScreenMargin} ${largeScreenMarginClass}`}> 
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && !isThinking && inputValue.trim() && handleSendMessage()}
             placeholder="Type here..." 
-            className="w-full p-3 bg-transparent text-gray-800 focus:outline-none transition-colors text-xl placeholder-gray-500"
+            className="w-full p-3 bg-transparent text-gray-800 focus:outline-none transition-colors text-base sm:text-lg md:text-xl placeholder-gray-500"
             disabled={isThinking} // This disabled prop is technically redundant now but harmless
           />
           {inputValue.trim() && !isThinking && ( // This !isThinking is also redundant due to the parent conditional, but harmless
@@ -467,11 +530,11 @@ export default function Chatbot() {
               <button
                 onClick={() => inputValue.trim() && handleSendMessage()}
                 disabled={isThinking || !inputValue.trim()} 
-                className="px-7 py-3 bg-slate-700 text-white rounded-full hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-opacity-50 disabled:opacity-50 transition-colors text-base font-medium shadow-sm"
+                className="px-5 py-2.5 sm:px-7 sm:py-3 bg-slate-700 text-white rounded-full hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-opacity-50 disabled:opacity-50 transition-colors text-sm sm:text-base font-medium shadow-sm"
               >
                 Send
               </button>
-              <p className="ml-4 self-center text-base text-gray-500">Or Press Enter</p>
+              <p className="ml-3 sm:ml-4 self-center text-xs sm:text-base text-gray-500">Or Press Enter</p>
             </div>
           )}
         </div>

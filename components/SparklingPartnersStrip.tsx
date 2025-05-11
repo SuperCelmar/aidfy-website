@@ -34,7 +34,7 @@ const partners = [
     name: "Togo's Eateries",
     src: "https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/Togos_logo.png",
     alt: "Togo's Logo",
-    className: "w-28 md:w-32 h-20 md:h-24 relative",
+    className: "w-20 sm:w-24 md:w-32 h-16 sm:h-20 md:h-24 relative",
     status: "Pilot partner"
   },
   {
@@ -42,7 +42,7 @@ const partners = [
     name: "Edible Arrangements",
     src: "https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/edible_logo.png",
     alt: "Edible Arrangements Logo",
-    className: "w-28 md:w-32 h-20 md:h-24 relative",
+    className: "w-20 sm:w-24 md:w-32 h-16 sm:h-20 md:h-24 relative",
     status: "Pilot partner"
   },
   {
@@ -50,7 +50,7 @@ const partners = [
     name: "FranServe",
     src: "https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/franservelogo.png",
     alt: "FranServe Logo",
-    className: "w-28 md:w-32 h-20 md:h-24 relative",
+    className: "w-20 sm:w-24 md:w-32 h-16 sm:h-20 md:h-24 relative",
     status: "Pilot partner"
   },
   {
@@ -58,7 +58,7 @@ const partners = [
     name: "Pegnato Intelligence Network",
     src: "https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/pegnato-low-res.png",
     alt: "Pegnato Intelligence Network Logo",
-    className: "w-28 md:w-32 h-20 md:h-24 relative",
+    className: "w-20 sm:w-24 md:w-32 h-16 sm:h-20 md:h-24 relative",
     status: "Pilot partner"
   },
 ];
@@ -82,7 +82,7 @@ export function SparklingPartnersStrip({ title = "Proof-of-Concept Partners" }: 
           <InfiniteSlider 
             className='flex h-full w-full items-center' 
             duration={60} // Adjusted duration for potentially fewer items
-            gap={80} // Adjusted gap
+            gap={60} // Reduced gap slightly
             itemClassName='flex justify-center items-center h-full'
           >
             {partners.map(({ id, name, src, alt, className: logoClassName, status }) => (
