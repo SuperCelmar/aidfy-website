@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
+    "@supabase/supabase-js": "^2.49.4",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.8.1",
     "@voiceflow/runtime-client-js": "^1.13.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.10.4",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.509.0",
     "motion": "^12.10.5",
     "next": "15.0.0-rc.0",

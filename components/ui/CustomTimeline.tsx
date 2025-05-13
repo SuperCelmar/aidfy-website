@@ -60,6 +60,9 @@ export const CustomTimeline: React.FC<CustomTimelineProps> = ({ items, title, su
       {/* Title and Subtitle Section */}
       {(title || subtitle) && (
         <div className="max-w-7xl mx-auto py-12 px-4 md:px-8 lg:px-10 text-center md:text-left">
+          <span className="inline-block bg-white border border-gray-200 px-4 py-1.5 rounded-full text-sm font-medium text-slate-700 shadow-md mb-4">
+            Features
+          </span>
           {title && (
             <h2 className="text-4xl md:text-5xl mb-4 font-bold text-black max-w-4xl mx-auto md:mx-0">
               {title}

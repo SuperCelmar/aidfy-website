@@ -5,7 +5,6 @@ import CalComEmbed from '@/components/CalComEmbed';
 export default function BookDemoPage() {
   return (
     <>
-      <Header />
       <main className="flex-grow bg-white py-8 md:py-12">
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-8 md:mb-12">
@@ -25,7 +24,6 @@ export default function BookDemoPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </>
   );
 } 

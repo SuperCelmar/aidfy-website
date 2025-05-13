@@ -83,8 +83,8 @@ interface FeaturesTimelineProps {
 
 const FeaturesTimeline: React.FC<FeaturesTimelineProps> = ({
   features = defaultFeaturesData,
-  sectionTitle = "How Our AI Solutions Elevate Your Business",
-  sectionSubtitle = "Discover the core features that drive growth, efficiency, and customer satisfaction."
+  sectionTitle = "Unlock Business Potential with Better AI Automation",
+  sectionSubtitle = "Explore powerful features designed to boost growth, streamline operations, and delight your customers."
 }) => {
 
   const timelineData = features.map(feature => ({
@@ -113,6 +113,7 @@ const FeaturesTimeline: React.FC<FeaturesTimelineProps> = ({
 
   return (
     <section id="features" className="py-12 md:py-20 bg-white">
+      {/* CustomTimeline now sits below the centered pill */}
       <CustomTimeline 
           items={timelineData}
           title={sectionTitle}

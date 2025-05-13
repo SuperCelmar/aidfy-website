@@ -59,6 +59,9 @@ export default function Header() {
           <Link href="/#use-cases" className="text-gray-600 hover:text-slate-700 transition-colors">
             Use Cases
           </Link>
+          <Link href="/templates" className="text-gray-600 hover:text-slate-700 transition-colors">
+            Templates
+          </Link>
           {/* Add other desktop links here if any */}
         </nav>
         <div className="hidden md:flex items-center space-x-2">
@@ -99,6 +102,13 @@ export default function Header() {
               onClick={closeMobileMenu}
             >
               Use Cases
+            </Link>
+            <Link 
+              href="/templates" 
+              className="text-gray-700 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium"
+              onClick={closeMobileMenu}
+            >
+              Templates
             </Link>
             {/* Add other mobile links here */}
             <div className="pt-2 mt-2 border-t border-gray-200">

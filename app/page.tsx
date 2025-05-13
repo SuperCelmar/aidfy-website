@@ -1,8 +1,6 @@
-import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 // import ProblemSolution from '@/components/ProblemSolution'
 import { SparklingPartnersStrip } from '@/components/SparklingPartnersStrip'
-import Footer from '@/components/Footer'
 import BenefitsSection from '@/components/BenefitsSection'
 import FeaturesTimeline from '@/components/FeaturesTimeline'
 import UseCasesSection from '@/components/UseCasesSection'
@@ -34,7 +32,6 @@ const partnerIconEntries: IconEntry[] = [
 export default function HomePage() {
   return (
     <>
-      <Header />
       <main className="flex-grow bg-white">
         <Hero />
         <SparklingPartnersStrip />
@@ -43,7 +40,6 @@ export default function HomePage() {
         <UseCasesSection />
         <IntegrationsCloudSection iconEntries={partnerIconEntries} />
       </main>
-      <Footer />
     </>
   )
 } 
