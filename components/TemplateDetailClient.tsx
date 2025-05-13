@@ -20,7 +20,7 @@ const ContactForm = ({
   isSubmitting: boolean
 }) => {
   return (
-    <div className="bg-white p-6 md:p-8 rounded-lg shadow-xl relative w-full">
+    <div className="bg-white p-6 md:p-8 rounded-lg shadow-xl relative w-11/12 sm:w-5/6 md:w-3/4 lg:w-1/2 xl:w-2/5 max-w-lg">
       <button onClick={onCancel} className="absolute top-2 right-3 text-gray-400 hover:text-gray-600 text-3xl font-light">&times;</button>
       <h2 className="text-xl font-bold mb-6 text-gray-900 text-center">Access Template Files</h2>
       <form onSubmit={(e) => {
@@ -92,7 +92,7 @@ const DownloadInterface = ({
   };
   
   return (
-    <div className="bg-white p-6 md:p-8 rounded-lg shadow-xl relative w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+    <div className="bg-white p-6 md:p-8 rounded-lg shadow-xl relative w-11/12 sm:w-5/6 md:w-3/4 lg:w-1/2 xl:w-2/5 max-w-lg max-h-[80vh] overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-900">Download Template Files</h2>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700" aria-label="Close">
