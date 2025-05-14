@@ -60,6 +60,15 @@ export default function Footer() {
 
         <div className="border-t border-slate-600 pt-8 text-center text-sm">
           <p>&copy; {new Date().getFullYear()} AutomationDFY. All rights reserved.</p>
+          <div className="mt-2">
+            <Link href="/terms-and-conditions" className="text-slate-400 hover:text-white transition-colors underline">
+              Terms & Conditions
+            </Link>
+            <span className="mx-2 text-slate-500">|</span>
+            <Link href="/privacy-policy" className="text-slate-400 hover:text-white transition-colors underline">
+              Privacy Policy
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

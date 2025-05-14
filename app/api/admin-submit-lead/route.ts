@@ -21,7 +21,7 @@ const adminSupabase = supabaseUrl && supabaseServiceKey
   : null;
 
 export async function POST(req: NextRequest) {
-  console.log('[ADMIN API] Using service role key to bypass RLS');
+  // console.log('[ADMIN API] Using service role key to bypass RLS');
   
   // Check if admin client was initialized
   if (!adminSupabase) {
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     };
 
     // Try to insert using admin/service role client (bypasses RLS)
-    console.log('[ADMIN API] Attempting insert using SERVICE ROLE key...');
+    // console.log('[ADMIN API] Attempting insert using SERVICE ROLE key...');
     
     const { data, error } = await adminSupabase
       .from('leads')
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('[ADMIN API] Insert successful with service role!');
+    // console.log('[ADMIN API] Insert successful with service role!');
     return NextResponse.json({ 
       message: 'Lead submitted successfully via admin API', 
       data 
