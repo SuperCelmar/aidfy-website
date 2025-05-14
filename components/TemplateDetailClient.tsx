@@ -313,7 +313,7 @@ export default function TemplateDetailClient({ template, files }: TemplateDetail
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">{template.title}</h1>
           {template.template_date && (
             <p className="text-sm text-slate-400">
-              Published: {new Date(template.template_date + 'T00:00:00').toLocaleDateString()}
+              Published: {new Date(template.template_date + 'T00:00:00').toLocaleDateString('en-GB')}
             </p>
           )}
           <section>
