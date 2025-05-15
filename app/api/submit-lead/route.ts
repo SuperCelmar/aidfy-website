@@ -56,6 +56,11 @@ export async function POST(req: NextRequest) {
     
     const body = await req.json();
 
+    // --- START: Collect Metadata ---
+    const ip = req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+    const userAgent = req.headers.get('user-agent');
+    // --- END: Collect Metadata ---
+
     // Basic validation (consider more robust validation e.g. with Zod)
     const {
       firstName,
@@ -79,6 +84,10 @@ export async function POST(req: NextRequest) {
       interest_reason: interest,
       template_slug: template_slug,
       template_title: template_title, // This can be null if not always provided
+      // --- START: Add Metadata to leadData ---
+      ip_address: ip,
+      user_agent: userAgent,
+      // --- END: Add Metadata to leadData ---
     };
 
     // APPROACH 1: Try using Supabase client first (now that we've fixed RLS)

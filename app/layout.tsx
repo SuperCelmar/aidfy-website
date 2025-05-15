@@ -4,6 +4,8 @@ import './globals.css'
 import { ThemeProvider } from 'next-themes'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,9 +31,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <SpeedInsights/>
           <Header />
           <main className="flex-grow">{children}</main>
           <Footer />
+          <Analytics/>
         </ThemeProvider>
       </body>
     </html>

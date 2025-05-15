@@ -137,6 +137,7 @@ export default function Chatbot() {
   const eventSourceRef = useRef<EventSource | null>(null)
   const [isAiTextAnimationComplete, setIsAiTextAnimationComplete] = useState(true);
   const [currentAnimatingText, setCurrentAnimatingText] = useState<string | null>(null);
+  const [voiceflowTranscriptId, setVoiceflowTranscriptId] = useState<string | null>(null); // Added for transcript ID
 
   // ---- START: New state and constants for initial animation ----
   const ANIMATION_HEADER = "Unlock New Channels With AI Marketing Solutions";
@@ -157,6 +158,7 @@ export default function Chatbot() {
 
   const projectID = process.env.NEXT_PUBLIC_VOICEFLOW_PROJECT_ID;
   const apiKey = process.env.NEXT_PUBLIC_VOICEFLOW_API_KEY;
+  const versionID = process.env.NEXT_PUBLIC_VOICEFLOW_VERSION_ID; // Added for transcripts
 
   const interactingTitle = 'Ask me anything...' 
   const LAUNCH_ACTION = { type: 'launch' };
@@ -166,6 +168,245 @@ export default function Chatbot() {
   const logoWidthPlusGap = '[calc(2rem+0.75rem)]';
   const smallScreenMargin = 'ml-4';
   const largeScreenMarginClass = `sm:ml-${logoWidthPlusGap}`;
+
+  // Helper function to get OS, Browser, Device from User Agent
+  const getUserAgentDetails = () => {
+    if (typeof window === 'undefined') {
+      return { os: 'unknown', browser: 'unknown', device: 'unknown' };
+    }
+    const ua = navigator.userAgent;
+    let os = 'unknown', browser = 'unknown', device = 'desktop';
+
+    // OS Detection
+    if (/Windows/i.test(ua)) os = 'windows';
+    else if (/Macintosh|Mac OS X/i.test(ua)) os = 'macos';
+    else if (/Linux/i.test(ua)) os = 'linux';
+    else if (/Android/i.test(ua)) { os = 'android'; device = 'mobile'; }
+    else if (/iPhone|iPad|iPod/i.test(ua)) { os = 'ios'; device = ua.includes('iPad') ? 'tablet' : 'mobile';}
+
+    // Browser Detection
+    if (/Edg/i.test(ua)) browser = 'edge'; // Edge before Chrome
+    else if (/Chrome/i.test(ua) && !/Chromium/i.test(ua)) browser = 'chrome';
+    else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = 'safari'; // Safari after Chrome
+    else if (/Firefox/i.test(ua)) browser = 'firefox';
+    else if (/MSIE|Trident/i.test(ua)) browser = 'ie';
+    
+    // More specific device detection if not already mobile/tablet from OS
+    if (device === 'desktop' && /Mobile|Tablet|iPad|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+      device = /Tablet|iPad/i.test(ua) ? 'tablet' : 'mobile';
+    }
+    
+    return { os, browser, device };
+  };
+
+  const createVoiceflowTranscript = async (details?: { notes?: string; tags?: string[] }) => {
+    if (!projectID || !apiKey || !versionID || !currentUserID) {
+      if (!versionID) console.error("Voiceflow Version ID is not configured for transcripts.");
+      if (!projectID) console.error("Voiceflow Project ID is not configured.");
+      if (!apiKey) console.error("Voiceflow API Key is not configured.");
+      if (!currentUserID) console.error("User ID is not available for transcript.");
+      return;
+    }
+
+    // If details are provided (indicating an update) but no transcript has been created yet,
+    // it's likely an out-of-order call or an attempt to update a non-existent transcript.
+    // We should probably only attempt to create it. If it's an update call, voiceflowTranscriptId should exist.
+    if (details && !voiceflowTranscriptId) {
+      console.warn("Attempting to update transcript with details, but no transcriptId exists. This call will be ignored for update details, proceeding with creation if applicable.");
+      // Fall through to create without details if this is the initial creation path.
+      // If this function is *only* called for updates when details are present, this warning is key.
+      // For now, let's assume if details are present, it's an "enhance" operation on an existing transcript.
+      // The logic below will simply add notes/tags to the body, and the PUT should handle upsert.
+    }
+
+    const { os, browser, device } = getUserAgentDetails();
+    const body: any = {
+      projectID,
+      sessionID: currentUserID,
+      os,
+      browser,
+      device,
+      versionID: versionID, 
+    };
+
+    if (details?.notes) {
+      body.notes = details.notes;
+    }
+    if (details?.tags && details.tags.length > 0) {
+      body.reportTags = details.tags;
+    }
+
+    try {
+      const response = await fetch('https://api.voiceflow.com/v2/transcripts', {
+        method: 'PUT',
+        headers: {
+          'Authorization': apiKey,
+          'Content-Type': 'application/json',
+          'versionID': versionID,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (!voiceflowTranscriptId && result._id) { // First time creation
+          setVoiceflowTranscriptId(result._id);
+          console.log('Voiceflow transcript created:', result._id);
+        } else if (voiceflowTranscriptId && result._id === voiceflowTranscriptId) { // Subsequent call, an update
+          console.log('Voiceflow transcript updated with details:', result._id, details);
+        } else if (result._id) { // Response gave an ID, but local state might be out of sync
+          setVoiceflowTranscriptId(result._id); // Align local state
+          console.log('Voiceflow transcript operation successful (created/updated):', result._id, details);
+        }
+      } else {
+        const errorData = await response.text();
+        console.error('Failed to create/update Voiceflow transcript:', response.status, errorData, body);
+      }
+    } catch (error) {
+      console.error('Error calling Voiceflow transcript API:', error);
+    }
+  };
+
+  // --- START: New functions for transcript processing at conversation end ---
+
+  async function fetchTranscriptCSV(pID: string, tID: string): Promise<string | null> {
+    if (!pID || !tID || !apiKey) {
+      console.error("Missing projectID, transcriptID, or apiKey for fetching CSV.");
+      return null;
+    }
+    const url = `https://api.voiceflow.com/v2/transcripts/${pID}/${tID}/export?format=csv`;
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { 'Authorization': apiKey! }
+      });
+      if (!response.ok) {
+        console.error(`Failed to fetch transcript CSV: ${response.status} ${await response.text()}`);
+        return null;
+      }
+      return await response.text();
+    } catch (error) {
+      console.error('Error fetching transcript CSV:', error);
+      return null;
+    }
+  }
+
+  function analyzeTranscriptData(csvText: string): { notes?: string; tags?: string[] } {
+    const reportTags = new Set<string>();
+    let userName: string | null = null;
+    const lines = csvText.split('\\n');
+    
+    const bulletPoints: string[] = [];
+    const uniqueUserQuestions = new Set<string>();
+    const uniqueMatchedIntents = new Set<string>();
+
+    if (lines.length <= 1) return {}; // Empty or only header
+
+    const headerLine = lines[0].trim();
+    // Robust header parsing: handle potential spaces and case variations
+    const header = headerLine.split(',').map(h => h.trim().toLowerCase()); 
+
+    const userInputIndex = header.indexOf('user_input');
+    const intentMatchedIndex = header.indexOf('intent_matched');
+    // const aiResponseIndex = header.indexOf('response'); // Or 'speak' or similar, might need to check Voiceflow CSV format
+
+    if (userInputIndex === -1) {
+      console.warn("CSV header missing 'user_input'. Analysis for user name and questions might be incomplete.");
+    }
+    if (intentMatchedIndex === -1) {
+      console.warn("CSV header missing 'intent_matched'. Tag generation might be incomplete.");
+    }
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) continue; // Skip empty lines
+
+      // Basic CSV split - WARNING: This is naive and will break if fields contain commas.
+      const columns = line.split(','); 
+
+      if (intentMatchedIndex !== -1 && columns.length > intentMatchedIndex && columns[intentMatchedIndex]) {
+        const intent = columns[intentMatchedIndex].trim();
+        if (intent) {
+            reportTags.add(intent); // Add all intents to general tags
+            uniqueMatchedIntents.add(intent); // For specific note points
+        }
+      }
+
+      if (userInputIndex !== -1 && columns.length > userInputIndex && columns[userInputIndex]) {
+        const rawUserInput = columns[userInputIndex].trim();
+        if (rawUserInput) {
+          // Name extraction (keeping existing logic)
+          if (!userName) { // Only attempt to find name if not already found
+            const nameMatch = rawUserInput.toLowerCase().match(/my name is ([a-zA-Z\s]+)/i) ||
+                              rawUserInput.toLowerCase().match(/i'm ([a-zA-Z\s]+)/i) ||
+                              rawUserInput.toLowerCase().match(/i am ([a-zA-Z\s]+)/i);
+            if (nameMatch && nameMatch[1]) {
+              const potentialName = nameMatch[1].trim();
+              userName = potentialName.split(' ')
+                                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                                    .join(' ');
+            }
+          }
+          // Question extraction
+          if (rawUserInput.endsWith('?')) {
+            uniqueUserQuestions.add(rawUserInput.substring(0, 100) + (rawUserInput.length > 100 ? '...' : '')); // Truncate long questions
+          }
+        }
+      }
+    }
+
+    // Constructing notes with bullet points
+    if (userName) {
+      bulletPoints.push(`* User identified as: ${userName}.`);
+      reportTags.add(`userName:${userName.replace(/\s+/g, '')}`); // Add as a tag friendly name
+    }
+
+    if (uniqueMatchedIntents.size > 0) {
+        bulletPoints.push(`* Key intents matched: ${Array.from(uniqueMatchedIntents).slice(0, 3).join(', ')}` + (uniqueMatchedIntents.size > 3 ? '...' : '.'));
+    }
+
+    if (uniqueUserQuestions.size > 0) {
+      bulletPoints.push('* Notable user questions:');
+      Array.from(uniqueUserQuestions).slice(0, 3).forEach(q => { // Max 3 questions in notes
+        bulletPoints.push(`  - "${q}"`);
+      });
+    }
+    
+    const notesContent = bulletPoints.join('\n');
+
+    const finalTags = Array.from(reportTags).filter(tag => tag && tag.length > 0);
+    return {
+      notes: notesContent.trim() || undefined,
+      tags: finalTags.length > 0 ? finalTags : undefined,
+    };
+  }
+
+  async function processAndEnrichTranscript() {
+    if (!projectID || !voiceflowTranscriptId || !currentUserID || !versionID) {
+      console.log("Cannot process and enrich transcript: Missing necessary IDs.", { projectID, voiceflowTranscriptId, currentUserID, versionID });
+      return;
+    }
+    console.log("Processing and enriching transcript:", voiceflowTranscriptId);
+
+    const csvData = await fetchTranscriptCSV(projectID, voiceflowTranscriptId);
+    if (!csvData) {
+      console.log("Failed to fetch CSV data for transcript enrichment.");
+      return;
+    }
+
+    const analysis = analyzeTranscriptData(csvData);
+    console.log("Transcript analysis result:", analysis);
+
+    if ((analysis.notes && analysis.notes.length > 0) || (analysis.tags && analysis.tags.length > 0)) {
+      // Call the enhanced createVoiceflowTranscript to update with new details
+      // It uses projectID, apiKey, versionID, currentUserID from the component's closure scope.
+      await createVoiceflowTranscript(analysis);
+    } else {
+      console.log("No new notes or tags derived from transcript analysis.");
+    }
+  }
+
+  // --- END: New functions for transcript processing at conversation end ---
 
   const handleTraceEvent = (trace: any) => {
     switch (trace.type) {
@@ -222,7 +463,12 @@ export default function Chatbot() {
         } 
         break
       case 'debug': break;
-      case 'end': setIsThinking(false); break;
+      case 'end': 
+        setIsThinking(false); 
+        if (voiceflowTranscriptId) { // Ensure transcript was created before trying to enrich
+          processAndEnrichTranscript();
+        }
+        break;
       default: break;
     }
   }
@@ -291,16 +537,28 @@ export default function Chatbot() {
     if (!customPayload && textToSend.trim()) {
       setMessages((prev) => [...prev, { type: 'user', text: textToSend }])
     }
+    // Create transcript on first actual send action if not already created
+    if (!voiceflowTranscriptId) {
+      createVoiceflowTranscript();
+    }
     await sendInteraction(interactionAction);
     if (!customPayload) setInputValue('');
   }
 
   const handleChoiceClick = (choicePayload: any) => {
+    // Create transcript on first actual choice action if not already created
+    if (!voiceflowTranscriptId) {
+      createVoiceflowTranscript();
+    }
     sendInteraction(choicePayload.request);
   }
 
   const handleCarouselButtonClick = (buttonPayload: any) => {
     if (buttonPayload) {
+        // Create transcript on first actual carousel button action if not already created
+        if (!voiceflowTranscriptId) {
+          createVoiceflowTranscript();
+        }
         sendInteraction(buttonPayload);
     } else {
         console.warn('Carousel button clicked without valid payload');
@@ -443,36 +701,31 @@ export default function Chatbot() {
       if (animationTimerRef.current) clearTimeout(animationTimerRef.current);
       if (textAnimationCompleteTimerRef.current) clearTimeout(textAnimationCompleteTimerRef.current);
       
-      // Reset button state when stopping the animation completely
       setShowAnimatedButtonsState(false);
       
       if (showLastFullMessage && initialVoiceflowPayloadForAnimation) {
-        setMessages([initialVoiceflowPayloadForAnimation]); // Show the full initial message
+        setMessages([initialVoiceflowPayloadForAnimation]);
       } else if (!initialVoiceflowPayloadForAnimation && !hasInteracted) {
-        // If animation was interrupted before payload fetch, and no prior interaction, trigger normal launch
         setMessages([]);
         sendInteraction(LAUNCH_ACTION);
       }
-      // If payload exists and not showing full message, normal UI will take over, expecting user input or further action.
-      // If messages are already populated from a previous stop, this won't overwrite them unless showLastFullMessage is true.
       setHasInteracted(true); 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInitialAnimationRunning, initialVoiceflowPayloadForAnimation, hasInteracted]); // sendInteraction, LAUNCH_ACTION are stable
+  }, [isInitialAnimationRunning, initialVoiceflowPayloadForAnimation, hasInteracted]);
 
 
   useEffect(() => {
-    // This effect fetches the initial Voiceflow payload for button display during animation
     const fetchInitialPayloadForAnimation = async () => {
+      console.log('[Chatbot] fetchInitialPayloadForAnimation: Called', { projectID, apiKey, initialVoiceflowPayloadForAnimation, isInitialAnimationRunning, hasInteracted });
       if (!projectID || !apiKey || initialVoiceflowPayloadForAnimation || !isInitialAnimationRunning || hasInteracted) {
-        // If animation is not running, or payload already fetched, or user has already initiated normal interaction.
-        // Note: `hasInteracted` is set to true by this effect itself after sendInteraction.
-        // It's also set by the original launch effect if animation is skipped.
+        console.log('[Chatbot] fetchInitialPayloadForAnimation: Bailing out due to conditions');
         return;
       }
-      // This is where the animation takes control of the first LAUNCH_ACTION
+      console.log('[Chatbot] fetchInitialPayloadForAnimation: Calling sendInteraction(LAUNCH_ACTION)');
       sendInteraction(LAUNCH_ACTION);
-      setHasInteracted(true); // Mark that interaction (for animation) has been initiated.
+      console.log('[Chatbot] fetchInitialPayloadForAnimation: After sendInteraction(LAUNCH_ACTION)');
+      setHasInteracted(true); 
     };
 
     if (isInitialAnimationRunning && !initialVoiceflowPayloadForAnimation && !hasInteracted) {
@@ -483,39 +736,29 @@ export default function Chatbot() {
 
 
   useEffect(() => {
-    if (!isInitialAnimationRunning || initialVoiceflowPayloadForAnimation) {
-      // Animation not running or payload already captured
-      if(interimAnimationTextParts.length > 0 && !initialVoiceflowPayloadForAnimation && !isInitialAnimationRunning) {
-          // Animation was stopped before choices arrived. Form a payload with available text.
-          const collectedFullText = interimAnimationTextParts.join(' ');
-          setInitialVoiceflowPayloadForAnimation({
-              type: 'ai',
-              text: collectedFullText,
-              choices: undefined // No choices were captured before stop
-          });
-          if (collectedFullText) {
-            const sentences = collectedFullText.match(/[^.!?]+[.!?\r\n]+/g) || [collectedFullText];
-            setDynamicAnimatedMessages(sentences.slice(0, 3).map(s => s.trim()).filter(s => s.length > 0));
-          } else {
-            setDynamicAnimatedMessages([]);
-          }
-          setInterimAnimationTextParts([]); // Clear interim
-          setMessages([]); // Clear any accumulated messages from UI
-      }
+    console.log('[Chatbot] Message Processing useEffect: Ran', { messagesLength: messages.length, isInitialAnimationRunning, initialVoiceflowPayloadForAnimation: initialVoiceflowPayloadForAnimation !== null, interimAnimationTextPartsLength: interimAnimationTextParts.length });
+    if (!isInitialAnimationRunning || initialVoiceflowPayloadForAnimation) { // Guard 1
+      console.log('[Chatbot] Message Processing useEffect: Bailing (Guard 1)');
       return;
     }
-  
+
     // This effect now processes messages to build the initial animation payload, waiting for choices.
     if (messages.length > 0) {
-      let collectedTextParts = [...interimAnimationTextParts];
+      if (initialVoiceflowPayloadForAnimation) { // Guard 2 - belt and suspenders
+          console.log('[Chatbot] Message Processing useEffect: Bailing (Guard 2)');
+          return;
+      }
+
+      const newCollectedTextParts = [...interimAnimationTextParts]; // Use a new variable for modification
       let foundChoicesPayload: ChatMessage['choices'] | undefined = undefined;
-      let processedAllCurrentMessages = true; // Assume we process all unless choices are found sooner
+      let hasNewText = false; // Flag to track if new text was actually added
   
       for (const msg of messages) {
           if (msg.type === 'ai') {
-              // Add text if it's new (simple check, might need refinement for complex cases)
-              if (msg.text && !collectedTextParts.some(part => part.includes(msg.text!))) {
-                  collectedTextParts.push(msg.text);
+              // Add text if it's new
+              if (msg.text && !newCollectedTextParts.some(part => part.includes(msg.text!))) {
+                  newCollectedTextParts.push(msg.text);
+                  hasNewText = true;
               }
               if (msg.choices && msg.choices.length > 0) {
                   foundChoicesPayload = msg.choices;
@@ -525,16 +768,24 @@ export default function Chatbot() {
           }
       }
       
-      // Update interim text parts regardless of finding choices yet, as more text might come before choices
-      setInterimAnimationTextParts(collectedTextParts);
+      // Update interim text parts only if they have actually changed
+      // This check helps prevent loops if messages are processed but don't add new unique text to interim parts.
+      if (hasNewText || (interimAnimationTextParts.length === 0 && newCollectedTextParts.length > 0 && messages.length > 0)) {
+        console.log('[Chatbot] Message Processing useEffect: Setting interimAnimationTextParts', newCollectedTextParts);
+        setInterimAnimationTextParts(newCollectedTextParts);
+      } else {
+        console.log('[Chatbot] Message Processing useEffect: No new text for interimAnimationTextParts, not setting.');
+      }
   
       if (foundChoicesPayload) {
-        const fullInitialText = collectedTextParts.join(' ');
-        setInitialVoiceflowPayloadForAnimation({
-          type: 'ai',
+        const fullInitialText = newCollectedTextParts.join(' ');
+        const newPayload = {
+          type: 'ai' as const,
           text: fullInitialText,
           choices: foundChoicesPayload,
-        });
+        };
+        console.log('[Chatbot] Message Processing useEffect: Setting initialVoiceflowPayloadForAnimation', newPayload);
+        setInitialVoiceflowPayloadForAnimation(newPayload);
         setCurrentAnimatedChoices(foundChoicesPayload);
   
         if (fullInitialText) {
@@ -653,15 +904,19 @@ export default function Chatbot() {
 
   // Wrapper for choice click to also stop animation
   const handleAnimatedChoiceClick = (choicePayload: any) => {
-    stopInitialAnimationAndTransition(); // Stop animation, but don't necessarily show full message
+    stopInitialAnimationAndTransition(); 
+    // Create transcript on first actual animated choice action if not already created
+    if (!voiceflowTranscriptId) {
+      createVoiceflowTranscript();
+    }
     if (choicePayload && choicePayload.request) {
         handleChoiceClick(choicePayload); // Pass the whole payload which contains .request
     } else if (choicePayload) { 
-        // If the structure is flatter, or it IS the request itself
-        // This case might need adjustment based on actual payload structure if it differs
         sendInteraction(choicePayload); 
     }
   };
+
+  console.log('[Chatbot] Render: States', { isInitialAnimationRunning, initialVoiceflowPayloadForAnimation: initialVoiceflowPayloadForAnimation !== null, isThinking, lastMessage: lastMessage !== null });
 
   return (
     <div 
@@ -784,7 +1039,7 @@ export default function Chatbot() {
       {/* Unified Carousel Display Area: Positioned after main text, before fixed bottom elements */}
       { !isInitialAnimationRunning && !isThinking && lastMessage?.carousel && (
         <div className="relative py-6"> {/* Added py-6 for vertical spacing around carousel */}
-            {/* Carousel Scroll Container */} 
+            {/* Carousel Scroll Container */}
             <div 
               ref={carouselContainerRef} 
               className="mt-4 overflow-x-auto pb-4 scroll-smooth no-scrollbar scroll-pl-2 sm:scroll-pl-4 md:scroll-pl-6 lg:scroll-pl-10 xl:scroll-pl-16"
@@ -809,7 +1064,7 @@ export default function Chatbot() {
                         isActive ? 'opacity-100 scale-105 z-10' : 'opacity-60 scale-95 z-0' 
                       }`}
                     >
-                      {/* Logo + ID Overlay */} 
+                      {/* Logo + ID Overlay */}
                       <div className={`absolute top-0.5 left-4 z-20 flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full transition-all duration-300 ease-out ${isActive ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}> 
                         <Image 
                           src="https://yrasqdvnkyxnhjxftjak.supabase.co/storage/v1/object/public/automationdfy-assets/logo.png" 
