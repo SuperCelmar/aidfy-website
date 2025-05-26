@@ -67,9 +67,9 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({
   title = "Why Our Partners Love It",
 }) => {
   return (
-    <section className="py-12 sm:py-16 px-4 sm:px-6 bg-white">
+    <section className="py-12 sm:py-16 px-4 sm:px-6 bg-white dark:bg-gray-900">
       <div className="container mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10 sm:mb-12">
+        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white text-center mb-10 sm:mb-12">
           {title}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
@@ -80,21 +80,21 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({
               <motion.article
                 key={benefit.id}
                 aria-labelledby={headlineId}
-                className="bg-gray-100 p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-2xl focus-within:ring-2 focus-within:ring-slate-700 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 flex flex-col items-center text-center"
+                className="bg-gray-100 dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-2xl focus-within:ring-2 focus-within:ring-slate-700 dark:focus-within:ring-blue-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 dark:focus-within:ring-offset-gray-800 flex flex-col items-center text-center"
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
               >
-                <IconComponent className="w-10 h-10 sm:w-12 sm:h-12 text-slate-700 mb-4 sm:mb-6" />
-                <h3 id={headlineId} className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
+                <IconComponent className="w-10 h-10 sm:w-12 sm:h-12 text-slate-700 dark:text-blue-400 mb-4 sm:mb-6" />
+                <h3 id={headlineId} className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
                   {benefit.headline}
                 </h3>
-                <p className="text-2xl sm:text-3xl md:text-[32px] leading-tight text-slate-700 font-semibold mb-3 sm:mb-4">
+                <p className="text-2xl sm:text-3xl md:text-[32px] leading-tight text-slate-700 dark:text-blue-400 font-semibold mb-3 sm:mb-4">
                   {benefit.metric}
                 </p>
-                <p className="text-sm sm:text-base text-gray-700">
+                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
                   {benefit.subtext}
                 </p>
               </motion.article>

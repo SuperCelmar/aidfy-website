@@ -91,14 +91,14 @@ const FeaturesTimeline: React.FC<FeaturesTimelineProps> = ({
     title: feature.section_title,
     description: (
       <div className="space-y-4">
-        <div className="flex items-center text-slate-700 mb-2">
+        <div className="flex items-center text-slate-700 dark:text-gray-300 mb-2">
           <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 stroke-current" /> {/* Adjusted icon size and margin slightly for mobile */}
-          <p className="font-semibold text-base sm:text-lg text-gray-800">{feature.title}</p> {/* Made font size responsive */}
+          <p className="font-semibold text-base sm:text-lg text-gray-800 dark:text-white">{feature.title}</p> {/* Made font size responsive */}
         </div>
-        <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+        <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
           {feature.description}
         </p>
-        <div className="mt-4 aspect-[16/10] rounded-lg overflow-hidden shadow-lg bg-gray-100">
+        <div className="mt-4 aspect-[16/10] rounded-lg overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-800">
           <Image 
             src={feature.imageSrc} 
             alt={feature.imageAlt} 
@@ -112,7 +112,7 @@ const FeaturesTimeline: React.FC<FeaturesTimelineProps> = ({
   }));
 
   return (
-    <section id="features" className="py-12 md:py-20 bg-white">
+    <section id="features" className="py-12 md:py-20 bg-white dark:bg-gray-900">
       {/* CustomTimeline now sits below the centered pill */}
       <CustomTimeline 
           items={timelineData}

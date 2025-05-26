@@ -70,7 +70,7 @@ export const AnimatedTabs: React.FC<AnimatedTabsProps> = ({
       {/* Tab Buttons Bar */}
       <div
         className={cn(
-          "flex space-x-1 rounded-lg p-1 bg-transparent border border-slate-300", // Tab bar: transparent bg, slate-300 border, p-1
+          "flex space-x-1 rounded-lg p-1 bg-transparent border border-slate-300 dark:border-gray-600", // Tab bar: transparent bg, slate-300 border, p-1
           tabListClassName
         )}
       >
@@ -83,7 +83,7 @@ export const AnimatedTabs: React.FC<AnimatedTabsProps> = ({
               tabButtonClassName,
               activeTab === tab.id
                 ? cn("text-white shadow-sm", activeTabButtonClassName || "bg-slate-700 border-slate-700") // Active: dark grey blue bg & border, white text
-                : cn("text-slate-700 hover:bg-slate-200", inactiveTabButtonClassName || "bg-slate-100 border-slate-300") // Inactive: slate bg & border, slate text
+                : cn("text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-700", inactiveTabButtonClassName || "bg-slate-100 dark:bg-gray-800 border-slate-300 dark:border-gray-600") // Inactive: slate bg & border, slate text
             )}
             aria-controls={`panel-${tab.id}`}
             aria-selected={activeTab === tab.id}
@@ -107,7 +107,7 @@ export const AnimatedTabs: React.FC<AnimatedTabsProps> = ({
       {/* Tab Content Area */}
       <div 
         ref={contentRef}
-        className={cn("mt-3 overflow-hidden rounded-lg bg-white shadow-lg p-1", tabContentContainerClassName)} // Content area: white background, more prominent shadow
+        className={cn("mt-3 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-lg p-1", tabContentContainerClassName)} // Content area: white background, more prominent shadow
       >
         <AnimatePresence mode="wait" initial={false}>
           {activeTabData && (

@@ -72,9 +72,9 @@ export function SparklingPartnersStrip({ title = "Proof-of-Concept Partners" }: 
   const sparklesColor = "#334155"; // Updated to dark blueish grey
 
   return (
-    <section className="relative py-16 md:py-24 bg-gray-50 overflow-hidden">
+    <section className="relative py-16 md:py-24 bg-gray-50 dark:bg-gray-800 overflow-hidden">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-12 md:mb-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white text-center mb-12 md:mb-16">
           {title}
         </h2>
 

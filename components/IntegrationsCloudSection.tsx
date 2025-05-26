@@ -16,8 +16,8 @@ interface IntegrationsCloudSectionProps {
 export const IntegrationsCloudSection: React.FC<IntegrationsCloudSectionProps> = ({
   title = 'Integrations & Partners',
   iconEntries,
-  containerClassName = 'py-16 border-t border-gray-200 bg-white',
-  titleClassName = 'text-3xl md:text-4xl font-bold text-center text-slate-800 mb-12 md:mb-16',
+  containerClassName = 'py-16 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900',
+  titleClassName = 'text-3xl md:text-4xl font-bold text-center text-slate-800 dark:text-white mb-12 md:mb-16',
   cloudContainerClassName = 'relative flex flex-col items-center justify-center w-full min-h-[300px] md:min-h-[400px] overflow-hidden rounded-lg',
 }) => {
   if (!iconEntries || iconEntries.length === 0) {

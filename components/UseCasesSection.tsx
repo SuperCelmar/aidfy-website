@@ -19,10 +19,10 @@ const useCasesData: Tab[] = [
           />
         </div>
         <div className="text-left">
-          <h3 className="text-xl md:text-2xl font-semibold text-slate-800 mb-2">
+          <h3 className="text-xl md:text-2xl font-semibold text-slate-800 dark:text-white mb-2">
             Handling Peak Seasonal CS
           </h3>
-          <p className="text-sm md:text-base text-slate-600">
+          <p className="text-sm md:text-base text-slate-600 dark:text-gray-300">
             For a gifting business, we cut the refund rate from 15% to 5% and slashed response times from 2 days to just 15 minutes during their busiest periods.
           </p>
         </div>
@@ -44,10 +44,10 @@ const useCasesData: Tab[] = [
           />
         </div>
         <div className="text-left">
-          <h3 className="text-xl md:text-2xl font-semibold text-slate-800 mb-2">
+          <h3 className="text-xl md:text-2xl font-semibold text-slate-800 dark:text-white mb-2">
             Streamlining Ordering & Tracking
           </h3>
-          <p className="text-sm md:text-base text-slate-600">
+          <p className="text-sm md:text-base text-slate-600 dark:text-gray-300">
             A restaurant franchise saw a 10% rise in orders and a 20% conversion boost by resolving IT and staffing issues, leading to higher CSAT scores.
           </p>
         </div>
@@ -58,13 +58,13 @@ const useCasesData: Tab[] = [
 
 export const UseCasesSection: React.FC = () => {
   return (
-    <section id="use-cases" className="py-12 md:py-20 bg-white min-h-screen flex flex-col justify-center"> {/* Added min-h-screen and flex properties */}
+    <section id="use-cases" className="py-12 md:py-20 bg-white dark:bg-gray-900 min-h-screen flex flex-col justify-center"> {/* Added min-h-screen and flex properties */}
       <div className="container mx-auto px-4 w-full"> {/* Ensured container takes width for centering */}
         <div className="text-center mb-10 md:mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-800">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-white">
             Solve Real Business Challenges
           </h2>
-          <p className="mt-3 md:mt-4 text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="mt-3 md:mt-4 text-base md:text-lg text-slate-600 dark:text-gray-300 max-w-2xl mx-auto">
             Discover how our AI-powered solutions are helping businesses like yours overcome critical obstacles and achieve remarkable results.
           </p>
         </div>

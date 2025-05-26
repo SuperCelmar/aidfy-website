@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'; // Import useState
+import ThemeToggle from './ThemeToggle';
 
 // A simple ChevronDownIcon component - not used in this version, can be removed if not needed elsewhere
 // const ChevronDownIcon = () => (
@@ -34,7 +35,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-md py-3 sm:py-4">
+    <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md py-3 sm:py-4">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-2 sm:space-x-3" onClick={closeMobileMenu}>
           <Image 
@@ -46,25 +47,29 @@ export default function Header() {
             priority // Add priority for LCP
           />
           {/* Hide text logo on very small screens if needed, or make font smaller */}
-          <span className="hidden sm:inline text-xl sm:text-2xl font-bold text-slate-700 self-center">
+          <span className="hidden sm:inline text-xl sm:text-2xl font-bold text-slate-700 dark:text-white self-center">
             AutomationDFY
           </span>
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-5 lg:space-x-6 items-center">
-          <Link href="/#features" className="text-gray-600 hover:text-slate-700 transition-colors">
+          <Link href="/#features" className="text-gray-600 dark:text-gray-300 hover:text-slate-700 dark:hover:text-white transition-colors">
             Features
           </Link>
-          <Link href="/#use-cases" className="text-gray-600 hover:text-slate-700 transition-colors">
+          <Link href="/#use-cases" className="text-gray-600 dark:text-gray-300 hover:text-slate-700 dark:hover:text-white transition-colors">
             Use Cases
           </Link>
-          <Link href="/templates" className="text-gray-600 hover:text-slate-700 transition-colors">
+          <Link href="/templates" className="text-gray-600 dark:text-gray-300 hover:text-slate-700 dark:hover:text-white transition-colors">
             Templates
+          </Link>
+          <Link href="/tutorials" className="text-gray-600 dark:text-gray-300 hover:text-slate-700 dark:hover:text-white transition-colors">
+            Tutorials
           </Link>
           {/* Add other desktop links here if any */}
         </nav>
-        <div className="hidden md:flex items-center space-x-2">
+        <div className="hidden md:flex items-center space-x-3">
+          <ThemeToggle />
           <Link
             href="/book-demo"
             className="bg-slate-700 text-white px-4 py-2 rounded-md hover:bg-slate-800 transition-colors text-sm font-medium"
@@ -74,11 +79,12 @@ export default function Header() {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center">
+        <div className="md:hidden flex items-center space-x-2">
+          <ThemeToggle />
           <button
             onClick={toggleMobileMenu}
             aria-label="Toggle mobile menu"
-            className="p-2 rounded-md text-slate-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-500"
+            className="p-2 rounded-md text-slate-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-500"
           >
             <HamburgerIcon open={isMobileMenuOpen} />
           </button>
@@ -87,31 +93,38 @@ export default function Header() {
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg rounded-b-md border-t border-gray-200">
+        <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 shadow-lg rounded-b-md border-t border-gray-200 dark:border-gray-700">
           <nav className="flex flex-col space-y-1 px-4 py-3">
             <Link 
               href="/#features" 
-              className="text-gray-700 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium"
+              className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 block px-3 py-2 rounded-md text-base font-medium"
               onClick={closeMobileMenu}
             >
               Features
             </Link>
             <Link 
               href="/#use-cases" 
-              className="text-gray-700 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium"
+              className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 block px-3 py-2 rounded-md text-base font-medium"
               onClick={closeMobileMenu}
             >
               Use Cases
             </Link>
             <Link 
               href="/templates" 
-              className="text-gray-700 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium"
+              className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 block px-3 py-2 rounded-md text-base font-medium"
               onClick={closeMobileMenu}
             >
               Templates
             </Link>
+            <Link 
+              href="/tutorials" 
+              className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 block px-3 py-2 rounded-md text-base font-medium"
+              onClick={closeMobileMenu}
+            >
+              Tutorials
+            </Link>
             {/* Add other mobile links here */}
-            <div className="pt-2 mt-2 border-t border-gray-200">
+            <div className="pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
               <Link
                 href="/book-demo"
                 className="bg-slate-700 text-white block w-full text-center px-4 py-2.5 rounded-md hover:bg-slate-800 transition-colors text-base font-medium"
