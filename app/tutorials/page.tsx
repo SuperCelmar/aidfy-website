@@ -2,6 +2,7 @@ import TutorialCard from '@/components/TutorialCard';
 import { getAllTutorials, getAllTutorialTags, Tutorial } from '@/lib/tutorials';
 import type { Metadata } from 'next';
 import TutorialFilters from '@/components/TutorialFilters';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'AI Tutorials | AutomationDFY',
@@ -75,7 +76,17 @@ export default async function TutorialsPage() {
       {/* Filters and Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Filters */}
-        <TutorialFilters availableTags={availableTags} />
+        <Suspense fallback={
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm animate-pulse">
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex-1 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              <div className="lg:w-48 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              <div className="lg:w-48 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            </div>
+          </div>
+        }>
+          <TutorialFilters availableTags={availableTags} />
+        </Suspense>
 
         {/* Tutorial Grid */}
         <div className="mt-8">
