@@ -71,7 +71,7 @@ const FixedBottomControls = memo<FixedBottomControlsProps>(({
             <button
               key={`fc-choice-${i}`}
               onClick={() => onChoiceClick(choice.payload)}
-              className="px-4 py-2 sm:px-5 sm:py-2.5 border border-slate-700 text-slate-700 rounded-lg hover:bg-slate-700 hover:text-white transition-colors text-sm sm:text-base font-medium"
+              className="px-4 py-2 sm:px-5 sm:py-2.5 border border-slate-700 dark:border-gray-600 text-slate-700 dark:text-gray-300 rounded-lg hover:bg-slate-700 dark:hover:bg-gray-600 hover:text-white dark:hover:text-white transition-colors text-sm sm:text-base font-medium"
             >
               {choice.label}
             </button>
@@ -99,7 +99,7 @@ const FixedBottomControls = memo<FixedBottomControlsProps>(({
                 }
             }}
             placeholder={isInitialAnimationRunning ? "Interact to begin..." : "Type here..."} 
-            className="w-full p-3 bg-transparent text-gray-800 focus:outline-none transition-colors text-base sm:text-lg md:text-xl placeholder-gray-500"
+            className="w-full p-3 bg-transparent text-gray-800 dark:text-white focus:outline-none transition-colors text-base sm:text-lg md:text-xl placeholder-gray-500 dark:placeholder-gray-400"
             disabled={disableInteraction}
           />
           {inputValue.trim() && ( 
@@ -114,7 +114,7 @@ const FixedBottomControls = memo<FixedBottomControlsProps>(({
               >
                 Send
               </button>
-              <p className="ml-3 sm:ml-4 self-center text-xs sm:text-base text-gray-500">Or Press Enter</p>
+              <p className="ml-3 sm:ml-4 self-center text-xs sm:text-base text-gray-500 dark:text-gray-400">Or Press Enter</p>
             </div>
           )}
         </div>
@@ -933,7 +933,7 @@ export default function Chatbot() {
               <TextGenerateEffect
                 key={currentAnimatedTextContent.title + '-header-title'}
                 words={currentAnimatedTextContent.title}
-                className={`${getAiMessageStyles(currentAnimatedTextContent.title).size} ${getAiMessageStyles(currentAnimatedTextContent.title).weight} text-gray-800 whitespace-pre-wrap`}
+                className={`${getAiMessageStyles(currentAnimatedTextContent.title).size} ${getAiMessageStyles(currentAnimatedTextContent.title).weight} text-gray-800 dark:text-white whitespace-pre-wrap`}
                 duration={0.5}
                 staggerDuration={0.02}
                 filter={false}
@@ -945,13 +945,13 @@ export default function Chatbot() {
             {currentAnimatedTextContent.description && animationCycleIndex === -1 && currentAnimatedTextContent.isDescriptionStage && (
               <>
                 {/* Static Header Title (already animated and visible) */}
-                <div className={`${getAiMessageStyles(ANIMATION_HEADER).size} ${getAiMessageStyles(ANIMATION_HEADER).weight} text-gray-800 whitespace-pre-wrap mb-2`}>
+                <div className={`${getAiMessageStyles(ANIMATION_HEADER).size} ${getAiMessageStyles(ANIMATION_HEADER).weight} text-gray-800 dark:text-white whitespace-pre-wrap mb-2`}>
                   {ANIMATION_HEADER}
                 </div>
                 <TextGenerateEffect
                   key={currentAnimatedTextContent.description + '-header-desc'}
                   words={currentAnimatedTextContent.description}
-                  className="text-base sm:text-lg md:text-xl text-gray-700 whitespace-pre-wrap"
+                  className="text-base sm:text-lg md:text-xl text-gray-700 dark:text-gray-300 whitespace-pre-wrap"
                   duration={0.5}
                   staggerDuration={0.015}
                   filter={false}
@@ -965,7 +965,7 @@ export default function Chatbot() {
                <TextGenerateEffect
                 key={currentAnimatedTextContent.title + `-dynamic-msg-${animationCycleIndex}`}
                 words={currentAnimatedTextContent.title}
-                className={`${getAiMessageStyles(currentAnimatedTextContent.title).size} ${getAiMessageStyles(currentAnimatedTextContent.title).weight} text-gray-800 whitespace-pre-wrap`}
+                className={`${getAiMessageStyles(currentAnimatedTextContent.title).size} ${getAiMessageStyles(currentAnimatedTextContent.title).weight} text-gray-800 dark:text-white whitespace-pre-wrap`}
                 duration={0.5}
                 staggerDuration={0.02}
                 filter={false}
@@ -992,7 +992,7 @@ export default function Chatbot() {
                   <div className={`flex-grow ${smallScreenMargin} ${largeScreenMarginClass}`}> 
                     {(() => {
                       const styles = getAiMessageStyles(lastMessage.text);
-                      const combinedClassName = `${styles.size} ${styles.weight} text-gray-800`;
+                      const combinedClassName = `${styles.size} ${styles.weight} text-gray-800 dark:text-white`;
 
                       if (!isAiTextAnimationComplete && lastMessage.text === currentAnimatingText) {
                         return (
@@ -1078,7 +1078,7 @@ export default function Chatbot() {
                       {/* Actual Card Content Div */} 
                       <div 
                         id={`carousel-card-${index}`}
-                        className="w-full h-auto aspect-[3/4] bg-white rounded-xl overflow-hidden shadow-xl flex flex-col"
+                        className="w-full h-auto aspect-[3/4] bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-xl flex flex-col"
                       >
                         {card.imageUrl && (
                           <div className="relative w-full aspect-[16/10] flex-shrink-0 bg-gray-100">
@@ -1092,13 +1092,13 @@ export default function Chatbot() {
                           </div>
                         )}
                         <div className="p-4 flex flex-col flex-grow"> 
-                          <h4 className="font-semibold text-base text-gray-800 truncate mb-2">{card.title}</h4> 
-                          <div className={`mt-auto grid ${buttonColClass} gap-2 pt-2 border-t border-gray-100`}> 
+                          <h4 className="font-semibold text-base text-gray-800 dark:text-white truncate mb-2">{card.title}</h4> 
+                                                      <div className={`mt-auto grid ${buttonColClass} gap-2 pt-2 border-t border-gray-100 dark:border-gray-700`}> 
                             {card.buttons.map((button, i) => (
                               <button
                                 key={i}
                                 onClick={() => handleCarouselButtonClick(button.payload)} 
-                                className="text-center px-2 py-1.5 text-slate-700 hover:bg-slate-100 rounded transition-colors text-xs font-medium truncate"
+                                className="text-center px-2 py-1.5 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-700 rounded transition-colors text-xs font-medium truncate"
                               >
                                 {button.label}
                               </button>

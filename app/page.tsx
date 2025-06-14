@@ -32,7 +32,7 @@ const partnerIconEntries: IconEntry[] = [
 export default function HomePage() {
   return (
     <>
-      <main className="flex-grow bg-white">
+      <main className="flex-grow bg-white dark:bg-gray-900">
         <Hero />
         <SparklingPartnersStrip />
         <FeaturesTimeline />
