@@ -10,12 +10,17 @@
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
+    "@square/web-sdk": "^2.1.0",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.49.4",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.8.1",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "@voiceflow/runtime-client-js": "^1.13.0",
+    "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.10.4",
     "jszip": "^3.10.1",
@@ -28,6 +33,7 @@
     "react-icon-cloud": "^4.1.7",
     "react-markdown": "^10.1.0",
     "react-use-measure": "^2.1.7",
+    "square": "^42.3.0",
     "tailwind-merge": "^3.2.0"
   },
   "devDependencies": {
