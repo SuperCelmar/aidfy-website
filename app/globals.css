@@ -11,17 +11,36 @@
 
 @layer base {
   :root {
-    /* --gradient-color: #8350e8; */ /* Example color from demo - can be changed to brand primary */
-    /* --sparkles-color: #8350e8; */ /* Example color from demo - can be changed to brand primary or white */
-    --gradient-color: #334155; /* Your brand primary */
-    --sparkles-color: #334155; /* Your brand primary */
+    /* Modular color tokens (RGB triplets) */
+    /* Light theme (default) */
+    --color-primary: 37 99 235;       /* #2563EB (from tailwind.config.ts) */
+    --color-secondary: 124 58 237;    /* #7C3AED */
+    --color-background: 249 250 251;  /* #F9FAFB (lightBg) */
+    --color-foreground: 15 23 42;     /* #0F172A */
+    --color-muted: 100 116 139;       /* #64748B */
+    --color-border: 226 232 240;      /* #E2E8F0 */
+    --color-card: 255 255 255;        /* #FFFFFF */
+    --color-accent: 51 65 85;         /* #334155 (keeps existing gradient feel) */
+
+    /* Effects bound to tokens */
+    --gradient-color: rgb(var(--color-accent));
+    --sparkles-color: rgb(var(--color-accent));
   }
 
-  /* If you implement a dark theme later with next-themes */
-  /* .dark { */
-  /*   --gradient-color: #2563EB; */ /* Adjust if needed for dark theme */
-  /*   --sparkles-color: #ffffff; */ /* Sparkles might be white on dark theme */
-  /* } */
+  .dark {
+    /* Dark theme overrides */
+    --color-primary: 99 102 241;      /* #6366F1 */
+    --color-secondary: 147 51 234;    /* #9333EA */
+    --color-background: 15 23 42;     /* #0F172A */
+    --color-foreground: 226 232 240;  /* #E2E8F0 */
+    --color-muted: 148 163 184;       /* #94A3B8 */
+    --color-border: 51 65 85;         /* #334155 */
+    --color-card: 2 6 23;             /* #020617 */
+    --color-accent: 148 163 184;      /* #94A3B8 */
+
+    --gradient-color: rgb(var(--color-accent));
+    --sparkles-color: rgb(var(--color-accent));
+  }
 }
 
 /* Line clamp utilities */
