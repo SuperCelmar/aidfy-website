@@ -1,0 +1,30 @@
+{
+  "companyId": "getseoni",
+  "companyName": "Seoni",
+  "logoUrl": "https://getseoni.com/cdn/shop/files/logo_seoni.svg",
+  "colors": {
+    "primary": "#52433A",
+    "secondary": "#EDE9E6",
+    "accent": "#0C0C0C"
+  },
+  "fontFamily": "Inter, sans-serif",
+  "painPoint": "Les foyers français ont souvent une eau calcaire et chlorée qui abîme la peau et les cheveux.",
+  "metrics": {
+    "rating": 4.8,
+    "ratingCount": 211,
+    "chlorineReductionNote": "Réduction mesurée du chlore et des métaux lourds"
+  },
+  "media": {
+    "videoUrl": "", 
+    "images": []
+  },
+  "locale": "fr",
+  "flags": {
+    "enableTestimonials": true,
+    "enableFaq": false,
+    "enableComparison": false,
+    "enableDarkMode": false
+  }
+}
+
+
