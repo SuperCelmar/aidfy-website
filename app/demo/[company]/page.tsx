@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { trackFunnelEvent, getOrCreateSessionId } from '@/lib/analytics';
-import { calculateRoi } from '@/lib/roi';
 import { splitIntoTwoLines } from '@/lib/text-utils';
 
 type Profile = {
@@ -196,41 +195,21 @@ function SlideSolution({ profile, onNext }: { profile: Profile; onNext: () => vo
 }
 
 function SlideRoi({ profile, onNext }: { profile: Profile; onNext: () => void }) {
-  const [leads, setLeads] = useState(1000);
-  const [aov, setAov] = useState(60);
-  const baseline = 0.05; // 5%
-  const fast = 0.3; // 30%
-  const roi = calculateRoi({ monthlyLeads: leads, averageOrderValue: aov, baselineConversionRate: baseline, fastResponseConversionRate: fast });
-
   return (
     <section className="space-y-6">
       <h3 className="text-2xl font-semibold" style={{ color: 'var(--brand-accent)' }}>
-        Impact sur les commandes et le CA
+        Architecture de la solution
       </h3>
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="p-4 rounded border">
-          <label className="text-sm text-gray-600">Leads mensuels</label>
-          <input type="number" value={leads} onChange={(e) => setLeads(Number(e.target.value))} className="mt-1 w-full rounded border px-3 py-2" />
-        </div>
-        <div className="p-4 rounded border">
-          <label className="text-sm text-gray-600">Panier moyen (€)</label>
-          <input type="number" value={aov} onChange={(e) => setAov(Number(e.target.value))} className="mt-1 w-full rounded border px-3 py-2" />
-        </div>
-        <div className="p-4 rounded border flex flex-col justify-center">
-          <div className="text-sm text-gray-600">Conversion 60s vs 24h</div>
-          <div className="font-semibold">30% vs 5%</div>
-        </div>
+      <div className="rounded overflow-hidden border" style={{ borderColor: 'var(--brand-primary)' }}>
+        <img
+          src="/infra_breakdown.png"
+          alt="Architecture breakdown"
+          className="w-full h-auto"
+        />
       </div>
-
-      <div className="grid md:grid-cols-3 gap-4">
-        <Stat title="Commandes actuelles" value={roi.baselineOrders.toFixed(0)} />
-        <Stat title="Commandes 60s" value={roi.fastResponseOrders.toFixed(0)} />
-        <Stat title="CA incrémental" value={`${roi.incrementalRevenue.toFixed(0)} €`} />
-      </div>
-
       <div>
         <button onClick={onNext} className="px-4 py-2 rounded text-white" style={{ background: 'var(--brand-primary)' }}>
-          Passer au chat
+          Suivant
         </button>
       </div>
     </section>
