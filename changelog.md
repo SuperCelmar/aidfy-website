@@ -10,6 +10,7 @@ This changelog is generated from git history. Dates are in local time.
 - Refactor color palette to modular CSS variables with light/dark tokens
 - Map Tailwind color utilities to CSS variables for runtime theming
 - Keep gradient/sparkles effects bound to tokens for consistency
+- Add new default palette (Space Cadet): full scales in Tailwind and theme tokens
 
 ### 2025-05-26
 - Add suspense loading for tutorial filters in TutorialsPage component (131dd65)

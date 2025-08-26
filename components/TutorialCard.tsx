@@ -11,11 +11,11 @@ const getDifficultyColor = (difficulty: string | null | undefined) => {
     case 'beginner':
       return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border-green-200 dark:border-green-700';
     case 'intermediate':
-      return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 border-blue-200 dark:border-blue-700';
+      return 'bg-uranian_blue-900/60 text-azul-500 border-uranian_blue-900';
     case 'advanced':
-      return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400 border-purple-200 dark:border-purple-700';
+      return 'bg-persian_indigo-900/20 text-persian_indigo-700 border-persian_indigo-800';
     default:
-      return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600';
+      return 'bg-background text-foreground border-border';
   }
 };
 
@@ -24,9 +24,9 @@ export default function TutorialCard({ tutorial }: TutorialCardProps) {
 
   return (
     <Link href={`/tutorials/${tutorial.slug}`} className="group">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 h-full">
+      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden hover:shadow-lg hover:border-uranian_blue-900 transition-all duration-200 h-full">
         {/* Video Thumbnail */}
-        <div className="relative aspect-video bg-gray-100 dark:bg-gray-700">
+        <div className="relative aspect-video bg-uranian_blue-900/40">
           {thumbnailUrl ? (
             <Image
               src={thumbnailUrl}
@@ -35,8 +35,8 @@ export default function TutorialCard({ tutorial }: TutorialCardProps) {
               className="object-cover group-hover:scale-105 transition-transform duration-200"
             />
           ) : (
-            <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
-              <div className="text-blue-500 dark:text-blue-400">
+            <div className="flex items-center justify-center h-full bg-gradient-to-br from-uranian_blue-900 to-persian_indigo-900/30">
+              <div className="text-primary">
                 <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                 </svg>
@@ -46,8 +46,8 @@ export default function TutorialCard({ tutorial }: TutorialCardProps) {
           
           {/* Play Button Overlay */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
-              <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <div className="bg-card/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+              <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
               </svg>
             </div>
@@ -56,7 +56,7 @@ export default function TutorialCard({ tutorial }: TutorialCardProps) {
           {/* Duration Badge */}
           {tutorial.estimated_duration && (
             <div className="absolute top-3 right-3">
-              <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm">
+              <span className="bg-black/70 text-card text-xs px-2 py-1 rounded-md backdrop-blur-sm">
                 {tutorial.estimated_duration}
               </span>
             </div>
@@ -73,24 +73,24 @@ export default function TutorialCard({ tutorial }: TutorialCardProps) {
               </span>
             )}
             {tutorial.tags && tutorial.tags.length > 0 && (
-              <span className="text-xs font-medium px-2 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400 border border-orange-200 dark:border-orange-700">
+              <span className="text-xs font-medium px-2 py-1 rounded-full bg-uranian_blue-800 text-azul-500 border border-uranian_blue-900">
                 {tutorial.tags[0]}
               </span>
             )}
           </div>
 
           {/* Title */}
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
             {tutorial.title}
           </h3>
 
           {/* Description */}
-          <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 mb-4">
+          <p className="text-muted text-sm line-clamp-3 mb-4">
             {tutorial.description || 'Learn essential skills and techniques in this comprehensive tutorial.'}
           </p>
 
           {/* Footer */}
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center justify-between text-xs text-muted">
             <span>
               {new Date(tutorial.created_at).toLocaleDateString('en-US', {
                 month: 'short',

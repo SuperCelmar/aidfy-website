@@ -8,7 +8,7 @@ const PlaceholderSocialIcon = ({ name }: { name: string }) => (
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-700 dark:bg-gray-800 text-slate-300 dark:text-gray-300 py-12 md:py-16">
+    <footer className="bg-card text-foreground py-12 md:py-16 border-t border-border">
       <div className="container mx-auto px-6 md:px-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 items-start">
           {/* Column 1: Brand and Slogan */}
@@ -25,25 +25,25 @@ export default function Footer() {
                 AutomationDFY
               </span> */}
             </Link>
-            <p className="text-sm text-slate-400 dark:text-gray-400">
+            <p className="text-sm text-muted">
               Unlocking new channels with AI marketing solutions.
             </p>
           </div>
 
           {/* Column 2: Quick Links */}
           <div>
-            <h5 className="font-semibold text-white dark:text-gray-100 mb-3">Navigate</h5>
+            <h5 className="font-semibold text-foreground mb-3">Navigate</h5>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/#features" className="hover:text-white dark:hover:text-gray-100 transition-colors">Features</Link></li>
-              <li><Link href="/#use-cases" className="hover:text-white dark:hover:text-gray-100 transition-colors">Use Cases</Link></li>
-              <li><Link href="/book-demo" className="hover:text-white dark:hover:text-gray-100 transition-colors">Book a Demo</Link></li>
+              <li><Link href="/#features" className="hover:text-foreground transition-colors">Features</Link></li>
+              <li><Link href="/#use-cases" className="hover:text-foreground transition-colors">Use Cases</Link></li>
+              <li><Link href="/book-demo" className="hover:text-foreground transition-colors">Book a Demo</Link></li>
               {/* Add more links as needed, e.g., Blog, About Us */}
             </ul>
           </div>
 
           {/* Column 3: Contact & Social */}
           <div>
-            <h5 className="font-semibold text-white dark:text-gray-100 mb-3">Connect</h5>
+            <h5 className="font-semibold text-foreground mb-3">Connect</h5>
             <ul className="space-y-2 text-sm mb-4">
               <li><a href="mailto:marcel.lin@automationdfy.com" className="hover:text-white dark:hover:text-gray-100 transition-colors">contact@automationdfy.com</a></li>
               {/* Add phone number or other contact if desired */}
@@ -58,14 +58,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-slate-600 dark:border-gray-700 pt-8 text-center text-sm">
+        <div className="border-t border-border pt-8 text-center text-sm">
           <p>&copy; {new Date().getFullYear()} AutomationDFY. All rights reserved.</p>
           <div className="mt-2">
-            <Link href="/terms-and-conditions" className="text-slate-400 dark:text-gray-400 hover:text-white dark:hover:text-gray-100 transition-colors underline">
+            <Link href="/terms-and-conditions" className="text-muted hover:text-foreground transition-colors underline">
               Terms & Conditions
             </Link>
-            <span className="mx-2 text-slate-500 dark:text-gray-500">|</span>
-            <Link href="/privacy-policy" className="text-slate-400 dark:text-gray-400 hover:text-white dark:hover:text-gray-100 transition-colors underline">
+            <span className="mx-2 text-muted">|</span>
+            <Link href="/privacy-policy" className="text-muted hover:text-foreground transition-colors underline">
               Privacy Policy
             </Link>
           </div>

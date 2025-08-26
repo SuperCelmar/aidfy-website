@@ -12,15 +12,15 @@
 @layer base {
   :root {
     /* Modular color tokens (RGB triplets) */
-    /* Light theme (default) */
-    --color-primary: 37 99 235;       /* #2563EB (from tailwind.config.ts) */
-    --color-secondary: 124 58 237;    /* #7C3AED */
-    --color-background: 249 250 251;  /* #F9FAFB (lightBg) */
-    --color-foreground: 15 23 42;     /* #0F172A */
-    --color-muted: 100 116 139;       /* #64748B */
-    --color-border: 226 232 240;      /* #E2E8F0 */
-    --color-card: 255 255 255;        /* #FFFFFF */
-    --color-accent: 51 65 85;         /* #334155 (keeps existing gradient feel) */
+    /* Light theme (Space Cadet palette) */
+    --color-primary: 34 34 59;        /* space_cadet 500 #22223b */
+    --color-secondary: 240 140 174;   /* tickle_me_pink 500 #f08cae */
+    --color-background: 238 247 253;  /* uranian_blue 900 #eef7fd */
+    --color-foreground: 34 34 59;     /* space_cadet 500 #22223b */
+    --color-muted: 96 96 163;         /* space_cadet 700 #6060a3 */
+    --color-border: 202 202 224;      /* space_cadet 900 #cacae0 */
+    --color-card: 255 255 255;        /* white */
+    --color-accent: 57 22 145;        /* persian_indigo 500 #391691 */
 
     /* Effects bound to tokens */
     --gradient-color: rgb(var(--color-accent));
@@ -28,7 +28,60 @@
   }
 
   .dark {
-    /* Dark theme overrides */
+    /* Dark theme overrides (Space Cadet palette) */
+    --color-primary: 34 34 59;        /* space_cadet 500 #22223b */
+    --color-secondary: 232 74 127;    /* tickle_me_pink 400 #e84a7f */
+    --color-background: 27 27 47;     /* space_cadet 400 #1b1b2f */
+    --color-foreground: 238 247 253;  /* uranian_blue 900 #eef7fd */
+    --color-muted: 96 96 163;         /* space_cadet 700 #6060a3 */
+    --color-border: 64 64 111;        /* space_cadet 600 #40406f */
+    --color-card: 20 20 35;           /* space_cadet 300 #141423 */
+    --color-accent: 120 77 228;       /* persian_indigo 700 #784de4 */
+
+    --gradient-color: rgb(var(--color-accent));
+    --sparkles-color: rgb(var(--color-accent));
+  }
+
+  /* Theme packs for runtime switching */
+  :root[data-theme="space"] {
+    --color-primary: 1 111 185;
+    --color-secondary: 240 140 174;
+    --color-background: 238 247 253;
+    --color-foreground: 34 34 59;
+    --color-muted: 96 96 163;
+    --color-border: 202 202 224;
+    --color-card: 255 255 255;
+    --color-accent: 57 22 145;
+    --gradient-color: rgb(var(--color-accent));
+    --sparkles-color: rgb(var(--color-accent));
+  }
+  .dark[data-theme="space"] {
+    --color-primary: 1 149 248;
+    --color-secondary: 232 74 127;
+    --color-background: 27 27 47;
+    --color-foreground: 238 247 253;
+    --color-muted: 96 96 163;
+    --color-border: 64 64 111;
+    --color-card: 20 20 35;
+    --color-accent: 120 77 228;
+    --gradient-color: rgb(var(--color-accent));
+    --sparkles-color: rgb(var(--color-accent));
+  }
+
+  /* Legacy theme pack for rollback */
+  :root[data-theme="legacy"] {
+    --color-primary: 37 99 235;       /* #2563EB */
+    --color-secondary: 124 58 237;    /* #7C3AED */
+    --color-background: 249 250 251;  /* #F9FAFB */
+    --color-foreground: 15 23 42;     /* #0F172A */
+    --color-muted: 100 116 139;       /* #64748B */
+    --color-border: 226 232 240;      /* #E2E8F0 */
+    --color-card: 255 255 255;        /* #FFFFFF */
+    --color-accent: 51 65 85;         /* #334155 */
+    --gradient-color: rgb(var(--color-accent));
+    --sparkles-color: rgb(var(--color-accent));
+  }
+  .dark[data-theme="legacy"] {
     --color-primary: 99 102 241;      /* #6366F1 */
     --color-secondary: 147 51 234;    /* #9333EA */
     --color-background: 15 23 42;     /* #0F172A */
@@ -37,7 +90,6 @@
     --color-border: 51 65 85;         /* #334155 */
     --color-card: 2 6 23;             /* #020617 */
     --color-accent: 148 163 184;      /* #94A3B8 */
-
     --gradient-color: rgb(var(--color-accent));
     --sparkles-color: rgb(var(--color-accent));
   }
