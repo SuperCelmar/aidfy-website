@@ -19,11 +19,21 @@ type Profile = {
 };
 
 interface DemoPageProps {
-  params: { company: string };
+  params: Promise<{ company: string }>;
 }
 
 export default function DemoPage({ params }: DemoPageProps) {
-  const { company } = params;
+  const [company, setCompany] = useState<string>('');
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { company } = await params;
+      if (active) setCompany(company);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [params]);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [index, setIndex] = useState(0);
