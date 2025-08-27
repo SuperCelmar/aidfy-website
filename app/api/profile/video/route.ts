@@ -25,26 +25,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'companyId and videoUrl are required' }, { status: 400 });
     }
 
-    const { data: existing, error: selErr } = await admin
+    const { data: updated, error: updErr } = await admin
       .from('demo_profiles')
-      .select('media')
+      .update({ media: { videoUrl } })
       .eq('company_id', companyId)
-      .maybeSingle();
-
-    if (selErr) return NextResponse.json({ message: 'DB error', error: selErr }, { status: 500 });
-    if (!existing) return NextResponse.json({ message: 'Profile not found' }, { status: 404 });
-
-    const currentMedia = (existing as any).media || {};
-    const merged = { ...currentMedia, videoUrl };
-
-    const { error: updErr } = await admin
-      .from('demo_profiles')
-      .update({ media: merged })
-      .eq('company_id', companyId);
+      .select('company_id');
 
     if (updErr) return NextResponse.json({ message: 'Update error', error: updErr }, { status: 500 });
 
-    return NextResponse.json({ ok: true, companyId, videoUrl });
+    if (!updated || updated.length === 0) {
+      // Upsert minimal row if missing
+      const { error: insErr } = await admin
+        .from('demo_profiles')
+        .insert([{ company_id: companyId, company_name: companyId, media: { videoUrl } }]);
+      if (insErr) return NextResponse.json({ message: 'Insert error', error: insErr }, { status: 500 });
+      return NextResponse.json({ ok: true, companyId, videoUrl, created: true });
+    }
+
+    return NextResponse.json({ ok: true, companyId, videoUrl, updated: true });
   } catch (err: any) {
     return NextResponse.json({ message: err.message || 'Unexpected error' }, { status: 500 });
   }

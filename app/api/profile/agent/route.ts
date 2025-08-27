@@ -25,14 +25,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'companyId and convocoreAgentId are required' }, { status: 400 });
     }
 
-    const { error } = await admin
+    // Try update first
+    const { data: updateData, error: updErr } = await admin
       .from('demo_profiles')
       .update({ convocore_agent_id: convocoreAgentId })
-      .eq('company_id', companyId);
+      .eq('company_id', companyId)
+      .select('company_id');
 
-    if (error) return NextResponse.json({ message: 'Update error', error }, { status: 500 });
+    if (updErr) return NextResponse.json({ message: 'Update error', error: updErr }, { status: 500 });
 
-    return NextResponse.json({ ok: true, companyId });
+    if (!updateData || updateData.length === 0) {
+      // Upsert minimal row when missing
+      const { error: insErr } = await admin
+        .from('demo_profiles')
+        .insert([{ company_id: companyId, company_name: companyId, convocore_agent_id: convocoreAgentId }]);
+      if (insErr) return NextResponse.json({ message: 'Insert error', error: insErr }, { status: 500 });
+      return NextResponse.json({ ok: true, companyId, created: true });
+    }
+
+    return NextResponse.json({ ok: true, companyId, updated: true });
   } catch (err: any) {
     return NextResponse.json({ message: err.message || 'Unexpected error' }, { status: 500 });
   }
