@@ -237,14 +237,22 @@ function SlideRoi({ profile, onNext, onPrev }: { profile: Profile; onNext: () =>
 }
 
 function SlideChatCta({ profile, onNext, onPrev }: { profile: Profile; onNext: () => void; onPrev: () => void }) {
+  const [vgRegion, setVgRegion] = useState<'na' | 'eu'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem(`vg_region_${profile.companyId}`);
+      if (saved === 'na' || saved === 'eu') return saved;
+    }
+    return 'na';
+  });
+
   useEffect(() => {
     if (!profile.convocoreAgentId) return;
     const w = window as any;
     // If agent changed, reload script with new config
-    if (w.__vg_agent_id !== profile.convocoreAgentId) {
+    if (w.__vg_agent_id !== profile.convocoreAgentId || w.__vg_region !== vgRegion) {
       w.VG_CONFIG = {
         ID: profile.convocoreAgentId,
-        region: 'na',
+        region: vgRegion,
         render: 'full-width',
         stylesheets: ['https://vg-bunny-cdn.b-cdn.net/vg_live_build/styles.css'],
       };
@@ -253,10 +261,16 @@ function SlideChatCta({ profile, onNext, onPrev }: { profile: Profile; onNext: (
       const s = document.createElement('script');
       s.src = 'https://vg-bunny-cdn.b-cdn.net/vg_live_build/vg_bundle.js?v=' + Date.now();
       s.defer = true;
-      s.onload = () => { w.__vg_agent_id = profile.convocoreAgentId; };
+      s.onload = () => { w.__vg_agent_id = profile.convocoreAgentId; w.__vg_region = vgRegion; };
       document.body.appendChild(s);
     }
-  }, [profile.convocoreAgentId]);
+  }, [profile.convocoreAgentId, vgRegion]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(`vg_region_${profile.companyId}`, vgRegion);
+    }
+  }, [vgRegion, profile.companyId]);
 
   return (
     <section onClick={onNext} className="space-y-6 cursor-pointer select-none">
@@ -265,8 +279,26 @@ function SlideChatCta({ profile, onNext, onPrev }: { profile: Profile; onNext: (
       </h3>
       {profile.convocoreAgentId ? (
         <div className="rounded p-4 border" style={{ borderColor: 'var(--brand-primary)' }}>
-          <div className="mx-auto w-full" style={{ maxWidth: 640 }}>
-            <div style={{ width: '100%', height: 640 }} id="VG_OVERLAY_CONTAINER" onClick={(e) => e.stopPropagation()} />
+          <div className="mx-auto w-full relative" style={{ maxWidth: 720 }}>
+            <div style={{ width: '100%', height: 720 }} id="VG_OVERLAY_CONTAINER" onClick={(e) => e.stopPropagation()} />
+            <div className="absolute top-2 right-2 flex gap-2" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={() => setVgRegion('na')}
+                className={`px-2 py-1 rounded text-sm ${vgRegion === 'na' ? 'text-white' : ''}`}
+                style={{ background: vgRegion === 'na' ? 'var(--brand-primary)' : 'rgba(0,0,0,0.2)' }}
+              >
+                NA
+              </button>
+              <button
+                type="button"
+                onClick={() => setVgRegion('eu')}
+                className={`px-2 py-1 rounded text-sm ${vgRegion === 'eu' ? 'text-white' : ''}`}
+                style={{ background: vgRegion === 'eu' ? 'var(--brand-primary)' : 'rgba(0,0,0,0.2)' }}
+              >
+                EU
+              </button>
+            </div>
           </div>
         </div>
       ) : (
