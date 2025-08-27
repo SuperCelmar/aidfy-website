@@ -4,6 +4,9 @@ import { normalizeProfile } from '@/lib/profile';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function GET(_req: NextRequest, { params }: { params: { company: string } }) {
   const company = params.company;
 
