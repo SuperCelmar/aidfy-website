@@ -57,7 +57,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // --- START: Collect Metadata ---
-    const ip = req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+    const forwardedFor = req.headers.get('x-forwarded-for');
+    const realIp = req.headers.get('x-real-ip');
+    const ip = (forwardedFor ? forwardedFor.split(',')[0].trim() : null) || realIp || null;
     const userAgent = req.headers.get('user-agent');
     // --- END: Collect Metadata ---
 
