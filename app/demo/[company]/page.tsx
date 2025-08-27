@@ -107,7 +107,7 @@ export default function DemoPage({ params }: DemoPageProps) {
             </button>
           </div>
 
-          <div className="max-w-5xl mx-auto px-4">
+          <div className="w-full max-w-7xl mx-auto px-6">
             {index === 0 && <SlideIntro profile={profile} onNext={async () => { await onStep('intro_clicked'); setIndex(1); }} onPrev={() => setIndex(0)} />}
             {index === 1 && <SlideLanding profile={profile} onNext={() => setIndex(2)} onPrev={() => setIndex(0)} />}
             {index === 2 && <SlideProblem profile={profile} onNext={() => setIndex(3)} onPrev={() => setIndex(1)} />}
@@ -158,20 +158,22 @@ function SlideLanding({ profile, onNext, onPrev }: { profile: Profile; onNext: (
   return (
     <section
       onClick={onNext}
-      className="rounded-xl p-8 grid place-items-center min-h-[70vh] cursor-pointer select-none"
-      style={{ background: `linear-gradient(135deg, var(--brand-secondary), ${shade(profile.colors.primary, 0.15)})` }}
+      className="rounded-xl py-16 px-6 grid place-items-center min-h-[70vh] cursor-pointer select-none"
+      style={{ background: `linear-gradient(135deg, var(--brand-secondary), ${shade(profile.colors.primary, 0.1)})` }}
     >
-      <h2
-        className="font-extrabold text-center"
-        style={{
-          fontFamily: 'var(--font-body)',
-          color: '#ffffff',
-          lineHeight: 1.05,
-          fontSize: 'clamp(2.5rem, 8vw, 8rem)'
-        }}
-      >
-        {profile.companyName}
-      </h2>
+      <div className="w-full max-w-6xl">
+        <h2
+          className="font-extrabold text-center"
+          style={{
+            fontFamily: 'var(--font-body)',
+            color: '#ffffff',
+            lineHeight: 1.05,
+            fontSize: 'clamp(3rem, 10vw, 10rem)'
+          }}
+        >
+          {profile.companyName}
+        </h2>
+      </div>
     </section>
   );
 }
@@ -263,7 +265,9 @@ function SlideChatCta({ profile, onNext, onPrev }: { profile: Profile; onNext: (
       </h3>
       {profile.convocoreAgentId ? (
         <div className="rounded p-4 border" style={{ borderColor: 'var(--brand-primary)' }}>
-          <div style={{ width: '100%', height: 500 }} id="VG_OVERLAY_CONTAINER" onClick={(e) => e.stopPropagation()} />
+          <div className="mx-auto w-full" style={{ maxWidth: 640 }}>
+            <div style={{ width: '100%', height: 640 }} id="VG_OVERLAY_CONTAINER" onClick={(e) => e.stopPropagation()} />
+          </div>
         </div>
       ) : (
         <p className="text-gray-700">
