@@ -23,6 +23,7 @@ export type DemoProfilesRow = {
   locale?: 'fr' | 'en' | null;
   flags?: Record<string, any> | null;
   cta?: { label?: string; href?: string } | null;
+  convocore_agent_id?: string | null;
 };
 
 export function slugifyCompanyId(name: string): string {
@@ -57,6 +58,7 @@ export function mapWebhookToDemoProfileRow(payload: IncomingWebhook): DemoProfil
     locale: payload.locale || 'fr',
     flags: {},
     cta: null,
+    convocore_agent_id: payload.convocoreAgentId ?? null,
   };
 
   return row;
