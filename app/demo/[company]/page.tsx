@@ -84,22 +84,48 @@ export default function DemoPage({ params }: DemoPageProps) {
         </Link>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        {index === 0 && <SlideIntro profile={profile} onNext={async () => { await onStep('intro_clicked'); setIndex(1); }} />}
-        {index === 1 && <SlideLanding profile={profile} onNext={() => setIndex(2)} />}
-        {index === 2 && <SlideProblem profile={profile} onNext={() => setIndex(3)} />}
-        {index === 3 && <SlideSolution profile={profile} onNext={async () => { await onStep('solution'); setIndex(4); }} />}
-        {index === 4 && <SlideRoi profile={profile} onNext={async () => { await onStep('roi_submitted'); setIndex(5); }} />}
-        {index === 5 && <SlideChatCta profile={profile} onCta={async () => { await onStep('cta_clicked'); }} />}
+      <div className="w-full py-8">
+        <div className="mx-auto grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
+          <div className="pl-2">
+            <button
+              aria-label="Précédent"
+              onClick={() => setIndex((i) => Math.max(0, i - 1))}
+              className="px-2 py-2 rounded-r bg-black/30 text-white hover:bg-black/50"
+              style={{ pointerEvents: index > 0 ? 'auto' : 'none', opacity: index > 0 ? 1 : 0.3 }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M15.78 3.72a.75.75 0 0 1 0 1.06L9.56 11l6.22 6.22a.75.75 0 1 1-1.06 1.06l-6.75-6.75a.75.75 0 0 1 0-1.06l6.75-6.75a.75.75 0 0 1 1.06 0z" clipRule="evenodd"/></svg>
+            </button>
+          </div>
+
+          <div className="max-w-5xl mx-auto px-4">
+            {index === 0 && <SlideIntro profile={profile} onNext={async () => { await onStep('intro_clicked'); setIndex(1); }} onPrev={() => setIndex(0)} />}
+            {index === 1 && <SlideLanding profile={profile} onNext={() => setIndex(2)} onPrev={() => setIndex(0)} />}
+            {index === 2 && <SlideProblem profile={profile} onNext={() => setIndex(3)} onPrev={() => setIndex(1)} />}
+            {index === 3 && <SlideSolution profile={profile} onNext={async () => { await onStep('solution'); setIndex(4); }} onPrev={() => setIndex(2)} />}
+            {index === 4 && <SlideRoi profile={profile} onNext={async () => { await onStep('roi_submitted'); setIndex(5); }} onPrev={() => setIndex(3)} />}
+            {index === 5 && <SlideChatCta profile={profile} onNext={() => setIndex(5)} onPrev={() => setIndex(4)} />}
+          </div>
+
+          <div className="pr-2 text-right">
+            <button
+              aria-label="Suivant"
+              onClick={() => setIndex((i) => Math.min(5, i + 1))}
+              className="px-2 py-2 rounded-l bg-black/30 text-white hover:bg-black/50"
+              style={{ pointerEvents: index < 5 ? 'auto' : 'none', opacity: index < 5 ? 1 : 0.3 }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M8.22 20.28a.75.75 0 0 1 0-1.06L14.44 13 8.22 6.78a.75.75 0 0 1 1.06-1.06l6.75 6.75a.75.75 0 0 1 0 1.06l-6.75 6.75a.75.75 0 0 1-1.06 0z" clipRule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-function SlideIntro({ profile, onNext }: { profile: Profile; onNext: () => void }) {
+function SlideIntro({ profile, onNext, onPrev }: { profile: Profile; onNext: () => void; onPrev: () => void }) {
   const videoUrl = profile.media?.videoUrl || 'https://www.loom.com/embed/d2f9bede23a14e46b15b3bfe888a1daa';
   return (
-    <section className="min-h-[70vh] grid md:grid-cols-2 gap-6 items-center">
+    <section onClick={onNext} className="min-h-[70vh] grid md:grid-cols-2 gap-6 items-center cursor-pointer select-none">
       <div className="space-y-4">
         <h1 className="text-3xl md:text-4xl font-bold" style={{ color: 'var(--brand-accent)' }}>
           {profile.companyName} × AutomationDFY
@@ -107,9 +133,6 @@ function SlideIntro({ profile, onNext }: { profile: Profile; onNext: () => void 
         <p className="text-gray-700">
           Démarrage rapide de la démonstration personnalisée.
         </p>
-        <button onClick={onNext} className="px-4 py-2 rounded text-white" style={{ background: 'var(--brand-primary)' }}>
-          Commencer la démo
-        </button>
       </div>
       <div className="relative">
         <iframe className="w-full aspect-video rounded" src={videoUrl} allowFullScreen />
@@ -121,7 +144,7 @@ function SlideIntro({ profile, onNext }: { profile: Profile; onNext: () => void 
   );
 }
 
-function SlideLanding({ profile, onNext }: { profile: Profile; onNext: () => void }) {
+function SlideLanding({ profile, onNext, onPrev }: { profile: Profile; onNext: () => void; onPrev: () => void }) {
   return (
     <section
       onClick={onNext}
@@ -143,20 +166,20 @@ function SlideLanding({ profile, onNext }: { profile: Profile; onNext: () => voi
   );
 }
 
-function SlideProblem({ profile, onNext }: { profile: Profile; onNext: () => void }) {
+function SlideProblem({ profile, onNext, onPrev }: { profile: Profile; onNext: () => void; onPrev: () => void }) {
   const [first, second] = splitIntoTwoLines(profile.painPoint || '');
   return (
     <section onClick={onNext} className="min-h-[70vh] grid place-items-center rounded-xl p-8 cursor-pointer select-none" style={{ background: 'var(--brand-secondary)' }}>
       <div className="text-center" style={{ fontFamily: 'var(--font-body)' }}>
         <div
           className="font-extrabold"
-          style={{ color: 'var(--brand-accent)', lineHeight: 1.1, fontSize: 'clamp(2rem, 5.5vw, 5rem)' }}
+          style={{ color: 'var(--brand-accent)', lineHeight: 1.1, fontSize: 'clamp(1rem, 2.75vw, 2.5rem)' }}
         >
           {first}
         </div>
         <div
           className="font-extrabold"
-          style={{ color: 'var(--brand-primary)', lineHeight: 1.1, fontSize: 'clamp(2rem, 5.5vw, 5rem)' }}
+          style={{ color: 'var(--brand-primary)', lineHeight: 1.1, fontSize: 'clamp(1rem, 2.75vw, 2.5rem)' }}
         >
           {second}
         </div>
@@ -165,38 +188,27 @@ function SlideProblem({ profile, onNext }: { profile: Profile; onNext: () => voi
   );
 }
 
-function SlideSolution({ profile, onNext }: { profile: Profile; onNext: () => void }) {
-  const bullets = [
-    'IVR Twilio avec routage round-robin',
-    'SMS automatique en cas d’appel manqué',
-    'Agent vocal IA pour qualifier et réserver',
-    'Intégration calendrier et tableau de bord',
-  ];
+function SlideSolution({ profile, onNext, onPrev }: { profile: Profile; onNext: () => void; onPrev: () => void }) {
   return (
-    <section className="space-y-4">
+    <section onClick={onNext} className="space-y-4 cursor-pointer select-none">
       <h3 className="text-2xl font-semibold" style={{ color: 'var(--brand-accent)' }}>
-        Système de réponse en 60 secondes
+        Répondre aussi vite que possible lorsque le client est en mode 'achat'
       </h3>
-      <p className="text-gray-700">
-        Chaque nouveau lead reçoit un appel + SMS en moins d’une minute. L’agent IA qualifie et réserve.
-      </p>
-      <ul className="grid md:grid-cols-2 gap-3">
-        {bullets.map((b) => (
-          <li key={b} className="p-4 rounded text-white" style={{ background: 'var(--brand-primary)' }}>{b}</li>
-        ))}
-      </ul>
-      <div>
-        <button onClick={onNext} className="px-4 py-2 rounded text-white" style={{ background: 'var(--brand-primary)' }}>
-          Voir le ROI
-        </button>
+      <div className="rounded overflow-hidden border" style={{ borderColor: 'var(--brand-primary)' }}>
+        <img
+          src="/Lead%20Funnel.png"
+          alt="Lead funnel"
+          className="w-full h-auto"
+        />
       </div>
+      
     </section>
   );
 }
 
-function SlideRoi({ profile, onNext }: { profile: Profile; onNext: () => void }) {
+function SlideRoi({ profile, onNext, onPrev }: { profile: Profile; onNext: () => void; onPrev: () => void }) {
   return (
-    <section className="space-y-6">
+    <section onClick={onNext} className="space-y-6 cursor-pointer select-none">
       <h3 className="text-2xl font-semibold" style={{ color: 'var(--brand-accent)' }}>
         Architecture de la solution
       </h3>
@@ -207,18 +219,14 @@ function SlideRoi({ profile, onNext }: { profile: Profile; onNext: () => void })
           className="w-full h-auto"
         />
       </div>
-      <div>
-        <button onClick={onNext} className="px-4 py-2 rounded text-white" style={{ background: 'var(--brand-primary)' }}>
-          Suivant
-        </button>
-      </div>
+      
     </section>
   );
 }
 
-function SlideChatCta({ profile, onCta }: { profile: Profile; onCta: () => void }) {
+function SlideChatCta({ profile, onNext, onPrev }: { profile: Profile; onNext: () => void; onPrev: () => void }) {
   return (
-    <section className="space-y-6">
+    <section onClick={onNext} className="space-y-6 cursor-pointer select-none">
       <h3 className="text-2xl font-semibold" style={{ color: 'var(--brand-accent)' }}>
         Passons à l’action
       </h3>
@@ -244,14 +252,7 @@ function SlideChatCta({ profile, onCta }: { profile: Profile; onCta: () => void 
           Le widget n’est pas configuré pour cette démo.
         </p>
       )}
-      <div className="flex gap-3">
-        <Link href="/book-demo" onClick={onCta} className="px-4 py-2 rounded text-white" style={{ background: 'var(--brand-primary)' }}>
-          Réservez votre atelier
-        </Link>
-        <a href="https://cal.com" className="px-4 py-2 rounded border" style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-accent)' }}>
-          Voir le calendrier
-        </a>
-      </div>
+      
       <p className="text-sm text-gray-600">
         Garantie: sous 60s de réponse en 30 jours, sinon le prochain cycle n’est pas dû.
       </p>
