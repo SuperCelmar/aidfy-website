@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createFreshSupabaseClient } from '@/lib/supabase-fresh';
 import { normalizeProfile } from '@/lib/profile';
 import { readFile } from 'node:fs/promises';
@@ -7,8 +7,8 @@ import path from 'node:path';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET(_req: NextRequest, { params }: { params: { company: string } }) {
-  const { company } = params;
+export async function GET(_req: Request, { params }: { params: Promise<{ company: string }> }) {
+  const { company } = await params;
 
   // 1) Try local file under profiles/company.json for fast iteration
   try {
