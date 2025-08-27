@@ -235,6 +235,27 @@ function SlideRoi({ profile, onNext, onPrev }: { profile: Profile; onNext: () =>
 }
 
 function SlideChatCta({ profile, onNext, onPrev }: { profile: Profile; onNext: () => void; onPrev: () => void }) {
+  useEffect(() => {
+    if (!profile.convocoreAgentId) return;
+    const w = window as any;
+    // If agent changed, reload script with new config
+    if (w.__vg_agent_id !== profile.convocoreAgentId) {
+      w.VG_CONFIG = {
+        ID: profile.convocoreAgentId,
+        region: 'eu',
+        render: 'full-width',
+        stylesheets: ['https://vg-bunny-cdn.b-cdn.net/vg_live_build/styles.css'],
+      };
+      const existing = document.querySelector('script[src*="vg_bundle.js"]') as HTMLScriptElement | null;
+      if (existing) existing.remove();
+      const s = document.createElement('script');
+      s.src = 'https://vg-bunny-cdn.b-cdn.net/vg_live_build/vg_bundle.js';
+      s.defer = true;
+      s.onload = () => { w.__vg_agent_id = profile.convocoreAgentId; };
+      document.body.appendChild(s);
+    }
+  }, [profile.convocoreAgentId]);
+
   return (
     <section onClick={onNext} className="space-y-6 cursor-pointer select-none">
       <h3 className="text-2xl font-semibold" style={{ color: 'var(--brand-accent)' }}>
@@ -242,20 +263,7 @@ function SlideChatCta({ profile, onNext, onPrev }: { profile: Profile; onNext: (
       </h3>
       {profile.convocoreAgentId ? (
         <div className="rounded p-4 border" style={{ borderColor: 'var(--brand-primary)' }}>
-          <div style={{ width: '100%', height: 500 }} id="VG_OVERLAY_CONTAINER" />
-          <script dangerouslySetInnerHTML={{ __html: `
-            (function(){
-              window.VG_CONFIG = {
-                ID: '${profile.convocoreAgentId}',
-                region: 'eu',
-                render: 'full-width',
-                stylesheets: ["https://vg-bunny-cdn.b-cdn.net/vg_live_build/styles.css"]
-              };
-              var s=document.createElement('script');
-              s.src='https://vg-bunny-cdn.b-cdn.net/vg_live_build/vg_bundle.js';
-              s.defer=true;document.body.appendChild(s);
-            })();
-          ` }} />
+          <div style={{ width: '100%', height: 500 }} id="VG_OVERLAY_CONTAINER" onClick={(e) => e.stopPropagation()} />
         </div>
       ) : (
         <p className="text-gray-700">
@@ -263,9 +271,6 @@ function SlideChatCta({ profile, onNext, onPrev }: { profile: Profile; onNext: (
         </p>
       )}
       
-      <p className="text-sm text-gray-600">
-        Garantie: sous 60s de réponse en 30 jours, sinon le prochain cycle n’est pas dû.
-      </p>
     </section>
   );
 }
