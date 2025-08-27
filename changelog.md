@@ -11,6 +11,12 @@ This changelog is generated from git history. Dates are in local time.
 - Map Tailwind color utilities to CSS variables for runtime theming
 - Keep gradient/sparkles effects bound to tokens for consistency
 - Add new default palette (Space Cadet): full scales in Tailwind and theme tokens
+- Added Vitest config and tests for ROI calculator and profile normalization.
+- Created `profiles/getseoni.json` seed profile.
+- Implemented analytics utility with session ID and `/api/track` endpoint (service role insert to `funnel_events`).
+- Implemented `/api/profile/[company]` to load from local profile then Supabase `demo_profiles`.
+- Refactored `app/demo/[company]/page.tsx` to dynamic, themed 6-slide funnel with ROI calculator and analytics hooks. Removed chatbot embed placeholder per request; CTA only for now.
+- Scripts: added `test`, `test:watch`, and `format` to `package.json`.
 
 ### 2025-05-26
 - Add suspense loading for tutorial filters in TutorialsPage component (131dd65)
