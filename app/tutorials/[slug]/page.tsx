@@ -4,14 +4,13 @@ import type { Metadata } from 'next';
 import TutorialContent from '@/components/TutorialContent';
 
 interface TutorialPageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 }
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: TutorialPageProps): Promise<Metadata> {
-  const tutorial = await getTutorialBySlug(params.slug);
+  const { slug } = await params;
+  const tutorial = await getTutorialBySlug(slug);
 
   if (!tutorial) {
     return {
@@ -35,14 +34,15 @@ export async function generateStaticParams() {
 }
 
 export default async function TutorialPage({ params }: TutorialPageProps) {
-  const tutorial = await getTutorialBySlug(params.slug);
+  const { slug } = await params;
+  const tutorial = await getTutorialBySlug(slug);
 
   if (!tutorial) {
     notFound();
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       <TutorialContent tutorial={tutorial} />
     </div>
   );

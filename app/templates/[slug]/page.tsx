@@ -6,7 +6,7 @@ import TemplateDetailClient from '@/components/TemplateDetailClient';
 import type { Metadata, ResolvingMetadata } from 'next';
 
 interface TemplateDetailPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 // Generate params for static site generation (optional, but good practice)
@@ -22,7 +22,7 @@ export async function generateMetadata(
   { params }: TemplateDetailPageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const slug = params.slug;
+  const { slug } = await params;
   const template = await getTemplateBySlug(slug);
 
   if (!template) {
@@ -41,7 +41,8 @@ export async function generateMetadata(
 
 // This is now an async Server Component
 export default async function TemplateDetailPage({ params }: TemplateDetailPageProps) {
-  const template = await getTemplateBySlug(params.slug);
+  const { slug } = await params;
+  const template = await getTemplateBySlug(slug);
 
   if (!template) {
     notFound(); 
