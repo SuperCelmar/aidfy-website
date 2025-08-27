@@ -242,14 +242,14 @@ function SlideChatCta({ profile, onNext, onPrev }: { profile: Profile; onNext: (
     if (w.__vg_agent_id !== profile.convocoreAgentId) {
       w.VG_CONFIG = {
         ID: profile.convocoreAgentId,
-        region: 'eu',
+        region: 'na',
         render: 'full-width',
         stylesheets: ['https://vg-bunny-cdn.b-cdn.net/vg_live_build/styles.css'],
       };
       const existing = document.querySelector('script[src*="vg_bundle.js"]') as HTMLScriptElement | null;
       if (existing) existing.remove();
       const s = document.createElement('script');
-      s.src = 'https://vg-bunny-cdn.b-cdn.net/vg_live_build/vg_bundle.js';
+      s.src = 'https://vg-bunny-cdn.b-cdn.net/vg_live_build/vg_bundle.js?v=' + Date.now();
       s.defer = true;
       s.onload = () => { w.__vg_agent_id = profile.convocoreAgentId; };
       document.body.appendChild(s);
