@@ -43,7 +43,7 @@ export default function DemoPage({ params }: DemoPageProps) {
     let isActive = true;
     const load = async () => {
       try {
-        const res = await fetch(`/api/profile/${company}`);
+        const res = await fetch(`/api/profile/${company}`, { cache: 'no-store' });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.message || 'Failed to load profile');
         if (!isActive) return;
