@@ -7,6 +7,11 @@ const nextConfig = {
       { protocol: 'https', hostname: 'img.youtube.com',                   port: '', pathname: '/**' },
     ],
   },
+  experimental: {
+    outputFileTracingIncludes: {
+      '/api/profile/[company]': ['./profiles/**'],
+    },
+  },
 };
 
 module.exports = nextConfig;
