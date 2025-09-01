@@ -133,7 +133,8 @@ export default function DemoPage({ params }: DemoPageProps) {
 }
 
 function SlideIntro({ profile, onNext, onPrev }: { profile: Profile; onNext: () => void; onPrev: () => void }) {
-  const videoUrl = profile.media?.videoUrl || 'https://www.loom.com/embed/d2f9bede23a14e46b15b3bfe888a1daa';
+  const rawUrl = profile.media?.videoUrl || 'https://www.loom.com/embed/d2f9bede23a14e46b15b3bfe888a1daa';
+  const videoUrl = toEmbedUrl(rawUrl);
   return (
     <section onClick={onNext} className="min-h-[70vh] grid md:grid-cols-2 gap-6 items-center cursor-pointer select-none">
       <div className="space-y-4">
@@ -327,5 +328,21 @@ function shade(hex: string, amount: number): string {
   const g = Math.min(255, Math.max(0, ((num >> 8) & 0xff) * (1 - amount)));
   const b = Math.min(255, Math.max(0, (num & 0xff) * (1 - amount)));
   return `rgb(${r.toFixed(0)}, ${g.toFixed(0)}, ${b.toFixed(0)})`;
+}
+
+function toEmbedUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    // Loom share URLs: https://www.loom.com/share/{id}
+    // Loom embed URLs: https://www.loom.com/embed/{id}
+    if (u.hostname.includes('loom.com')) {
+      const parts = u.pathname.split('/').filter(Boolean);
+      const id = parts.pop();
+      if (id) return `https://www.loom.com/embed/${id}`;
+    }
+    return url;
+  } catch {
+    return url;
+  }
 }
 
