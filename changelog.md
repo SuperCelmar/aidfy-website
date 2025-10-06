@@ -2,6 +2,12 @@
 
 This changelog is generated from git history. Dates are in local time.
 
+### 2025-10-06
+- Templates and Tutorials pages now fetch on page refresh only:
+  - Added `export const dynamic = 'force-dynamic'` and `export const revalidate = 0` to `app/templates/page.tsx` and `app/tutorials/page.tsx` to prevent build-time/static refetching.
+  - Added Vitest tests asserting these flags for both pages.
+  - Updated `app/layout.tsx` Voiceflow loader to log detected locale to satisfy existing test.
+
 ### 2025-06-14
 - Implement fresh Supabase connection functionality and update dependencies (c18359c)
 - Merge branch 'main' of github.com/SuperCelmar/aidfy-website into development (d0885eb)

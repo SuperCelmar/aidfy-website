@@ -2,6 +2,10 @@ import TemplateCard from '@/components/TemplateCard';
 import { getAllTemplates, Template } from '@/lib/templates';
 import type { Metadata } from 'next';
 
+// Force runtime fetch on user refresh; avoid build-time or ISR caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'AI Templates | AutomationDFY',
   description: 'Browse our library of professional automation templates and functions designed to enhance your business operations.',

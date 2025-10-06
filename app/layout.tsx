@@ -42,6 +42,7 @@ export default function RootLayout({
       var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
       v.onload = function() {
         var detectedLocale = typeof window !== 'undefined' ? navigator.language || navigator.languages[0] || 'en-US' : 'en-US';
+        console.log('Detected Voiceflow locale:', detectedLocale);
         window.voiceflow.chat.load({
           verify: { projectID: '68c671ed563ae0917ad696cc' },
           url: 'https://general-runtime.voiceflow.com',

@@ -4,6 +4,10 @@ import type { Metadata } from 'next';
 import TutorialFilters from '@/components/TutorialFilters';
 import { Suspense } from 'react';
 
+// Force runtime fetch on user refresh; avoid build-time or ISR caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'AI Tutorials | AutomationDFY',
   description: 'Learn automation and AI through our comprehensive video tutorials. Master no-code solutions, workflow automation, and business intelligence.',
