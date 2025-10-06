@@ -6,6 +6,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/next"
+import Script from 'next/script'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -36,6 +37,39 @@ export default function RootLayout({
           <main className="flex-grow">{children}</main>
           <Footer />
           <Analytics/>
+          <Script id="voiceflow-chat-widget" strategy="afterInteractive">{`
+  (function(d, t) {
+      var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+      v.onload = function() {
+        var detectedLocale = typeof window !== 'undefined' ? navigator.language || navigator.languages[0] || 'en-US' : 'en-US';
+        window.voiceflow.chat.load({
+          verify: { projectID: '68c671ed563ae0917ad696cc' },
+          url: 'https://general-runtime.voiceflow.com',
+          versionID: 'staging',
+          assistantID: 'localStorage',
+          voice: {
+            url: "https://runtime-api.voiceflow.com"
+          },
+          launch: {
+            event: {
+              'type': 'launch',
+              'payload': {
+                'locale': detectedLocale,
+                'companyName': 'AutomationDFY'
+              }
+            }
+          }
+        }).then(() => {
+      window.voiceflow.chat.proactive.push(  
+        { type: 'text', payload: { message: 'Hey, we sell lots of hats!' } },  
+        { type: 'text', payload: { message: 'Want recommendations?' } }  
+      )
+    });
+
+      }
+      v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
+  })(document, 'script');
+          `}</Script>
         </ThemeProvider>
       </body>
     </html>

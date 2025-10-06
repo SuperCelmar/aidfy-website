@@ -18,6 +18,12 @@ This changelog is generated from git history. Dates are in local time.
 - Refactored `app/demo/[company]/page.tsx` to dynamic, themed 6-slide funnel with ROI calculator and analytics hooks. Removed chatbot embed placeholder per request; CTA only for now.
 - Scripts: added `test`, `test:watch`, and `format` to `package.json`.
 
+### 2025-09-14
+- Integrated Voiceflow chat widget globally in `app/layout.tsx` using `next/script` with `afterInteractive`.
+- Added SSR tests in `__tests__/voiceflow-widget.test.tsx` to verify widget snippet presence and locale detection (navigator.language / navigator.languages[0]).
+- Added Vitest setup mocks for Next modules and theme hook to support layout SSR in tests.
+- Added console log of detected locale in Voiceflow loader for debugging (wrapped in try/catch).
+
 ### 2025-05-26
 - Add suspense loading for tutorial filters in TutorialsPage component (131dd65)
 - Enhance application with new features and styling updates (41a3d6a)
