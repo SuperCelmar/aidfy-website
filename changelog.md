@@ -6,7 +6,7 @@ This changelog is generated from git history. Dates are in local time.
 - Templates and Tutorials pages now fetch on page refresh only:
   - Added `export const dynamic = 'force-dynamic'` and `export const revalidate = 0` to `app/templates/page.tsx` and `app/tutorials/page.tsx` to prevent build-time/static refetching.
   - Added Vitest tests asserting these flags for both pages.
-  - Updated `app/layout.tsx` Voiceflow loader to log detected locale to satisfy existing test.
+  - Removed Voiceflow agent widget from `app/layout.tsx` and updated tests to assert its absence.
 
 ### 2025-06-14
 - Implement fresh Supabase connection functionality and update dependencies (c18359c)
