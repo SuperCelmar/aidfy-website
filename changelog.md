@@ -2,6 +2,12 @@
 
 This changelog is generated from git history. Dates are in local time.
 
+### 2025-10-07
+- **Fixed 404 issue for dynamically added templates and tutorials:**
+  - Added `export const dynamicParams = true;` to `app/templates/[slug]/page.tsx` to allow templates added after build time to be generated on-demand
+  - Added `export const dynamicParams = true;` to `app/tutorials/[slug]/page.tsx` to allow tutorials added after build time to be generated on-demand
+  - This prevents 404 errors when new content is added to the database without requiring a full site redeployment
+
 ### 2025-10-06
 - Templates and Tutorials pages now fetch on page refresh only:
   - Added `export const dynamic = 'force-dynamic'` and `export const revalidate = 0` to `app/templates/page.tsx` and `app/tutorials/page.tsx` to prevent build-time/static refetching.

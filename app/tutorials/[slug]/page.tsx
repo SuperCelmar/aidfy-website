@@ -33,6 +33,9 @@ export async function generateStaticParams() {
   }));
 }
 
+// Allow dynamic params for tutorials not pre-generated at build time
+export const dynamicParams = true;
+
 export default async function TutorialPage({ params }: TutorialPageProps) {
   const { slug } = await params;
   const tutorial = await getTutorialBySlug(slug);

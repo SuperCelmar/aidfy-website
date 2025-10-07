@@ -17,6 +17,9 @@ export async function generateStaticParams() {
   }));
 }
 
+// Allow dynamic params for templates not pre-generated at build time
+export const dynamicParams = true;
+
 // Generate metadata for the page (title, description)
 export async function generateMetadata(
   { params }: TemplateDetailPageProps,
