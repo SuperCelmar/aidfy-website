@@ -8,6 +8,10 @@ This changelog is generated from git history. Dates are in local time.
   - Added `export const dynamicParams = true;` to `app/tutorials/[slug]/page.tsx` to allow tutorials added after build time to be generated on-demand
   - This prevents 404 errors when new content is added to the database without requiring a full site redeployment
 
+- **Fixed template detail page right column overflow issue:**
+  - Added `md:overflow-y-auto` to the right column in `components/TemplateDetailClient.tsx` to enable scrolling when video highlights content is long
+  - Fixes issue where "Access Template Files" button was inaccessible when video timestamps/highlights overflow the viewport
+
 ### 2025-10-06
 - Templates and Tutorials pages now fetch on page refresh only:
   - Added `export const dynamic = 'force-dynamic'` and `export const revalidate = 0` to `app/templates/page.tsx` and `app/tutorials/page.tsx` to prevent build-time/static refetching.

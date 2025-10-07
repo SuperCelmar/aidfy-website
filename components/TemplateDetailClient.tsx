@@ -337,7 +337,7 @@ export default function TemplateDetailClient({ template, files }: TemplateDetail
         </div>
         
         {/* Right Column: Media and Main Download Button */}
-        <div className="w-full md:w-2/5 p-4 md:p-8 bg-slate-700/50 dark:bg-slate-800/50 flex flex-col space-y-4">
+        <div className="w-full md:w-2/5 p-4 md:p-8 bg-slate-700/50 dark:bg-slate-800/50 flex flex-col space-y-4 md:overflow-y-auto">
           {/* Accordion Toggle for Video Section (Mobile Only) */}
           {(template.youtube_url || template.video_description) && (
             <button 
