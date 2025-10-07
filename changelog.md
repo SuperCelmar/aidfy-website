@@ -12,6 +12,12 @@ This changelog is generated from git history. Dates are in local time.
   - Added `md:overflow-y-auto` to the right column in `components/TemplateDetailClient.tsx` to enable scrolling when video highlights content is long
   - Fixes issue where "Access Template Files" button was inaccessible when video timestamps/highlights overflow the viewport
 
+- **Enabled dynamic data fetching for template and tutorial detail pages:**
+  - Added `export const revalidate = 0;` to `app/templates/[slug]/page.tsx` to fetch fresh data from database on every request
+  - Added `export const revalidate = 0;` to `app/tutorials/[slug]/page.tsx` to fetch fresh data from database on every request
+  - This ensures that updates to templates/tutorials in the database (like video_description changes) are immediately visible without requiring redeployment
+  - Pages will now always show the latest data from Supabase instead of cached/stale static content
+
 ### 2025-10-06
 - Templates and Tutorials pages now fetch on page refresh only:
   - Added `export const dynamic = 'force-dynamic'` and `export const revalidate = 0` to `app/templates/page.tsx` and `app/tutorials/page.tsx` to prevent build-time/static refetching.

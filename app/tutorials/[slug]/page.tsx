@@ -36,6 +36,9 @@ export async function generateStaticParams() {
 // Allow dynamic params for tutorials not pre-generated at build time
 export const dynamicParams = true;
 
+// Revalidate on every request to fetch fresh data from database
+export const revalidate = 0;
+
 export default async function TutorialPage({ params }: TutorialPageProps) {
   const { slug } = await params;
   const tutorial = await getTutorialBySlug(slug);
